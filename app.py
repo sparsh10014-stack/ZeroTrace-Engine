@@ -65,3 +65,5 @@ def verify_proof():
 if __name__ == '__main__':
     print("Starting ZeroTrace Verifier Node...")
     app.run(debug=True, port=5000)
+
+
