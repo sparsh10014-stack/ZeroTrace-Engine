@@ -1,8 +1,12 @@
 import sqlite3
+from pathlib import Path
 
 
-connection = sqlite3.connect("verification_logs.db")
+DATABASE_FOLDER = Path(__file__).resolve().parent
 
+DATABASE_PATH = DATABASE_FOLDER / "verification_logs.db"
+
+connection = sqlite3.connect(DATABASE_PATH)
 
 cursor = connection.cursor()
 
@@ -19,3 +23,4 @@ connection.commit()
 connection.close()
 
 print("Database setup completed successfully.")
+print(f"Database location: {DATABASE_PATH}")
