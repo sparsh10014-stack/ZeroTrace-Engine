@@ -13,25 +13,26 @@ def index():
     return app.send_static_file('index.html')
 
 
+# =========================================================
+# VERIFY ROUTE
+# =========================================================
 @app.route('/verify', methods=['POST'])
 def verify_proof():
     # Frontend se JSON request body receive kar rahe hain.
     payload = request.get_json()
 
-    # Check kar rahe hain ki request me JSON data actually aaya hai ya nahi.
+    # Agar request body empty hai to error return karo.
     if not payload:
         return jsonify({
             "status": "error",
             "message": "Request body is missing"
         }), 400
 
-    # JSON payload se Zero-Knowledge Proof nikal rahe hain.
+    # STEP 2: Proof aur Public Signals nikalna
     proof = payload.get('proof')
-
-    # JSON payload se public signals nikal rahe hain.
     public_signals = payload.get('publicSignals')
 
-    # Proof ya public signals missing hone par request reject kar denge.
+    # Agar proof ya public signals missing hain to request reject kar do.
     if proof is None or public_signals is None:
         return jsonify({
             "status": "error",
@@ -45,22 +46,21 @@ def verify_proof():
     proof_path = os.path.join("temp", "proof.json")
     public_path = os.path.join("temp", "public.json")
 
-    # Proof ko temporary JSON file me save kar rahe hain.
-    with open(proof_path, "w") as file:
-        json.dump(proof, file, indent=4)
-
-    # Public signals ko temporary JSON file me save kar rahe hain.
-    with open(public_path, "w") as file:
-        json.dump(public_signals, file, indent=4)
-
-    # Terminal me confirmation print kar rahe hain.
-    print("Proof saved:", proof_path)
-    print("Public signals saved:", public_path)
-
-    # SnarkJS Groth16 verification run kar rahe hain
-    npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
     try:
-        res = subprocess.run(
+        # STEP 4: Proof aur Public Signals ko temporary JSON files me save karna
+        with open(proof_path, "w") as file:
+            json.dump(proof, file, indent=4)
+
+        with open(public_path, "w") as file:
+            json.dump(public_signals, file, indent=4)
+
+        print("Proof saved:", proof_path)
+        print("Public signals saved:", public_path)
+
+        # STEP 5: SnarkJS Groth16 Verification
+        npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
+        
+        result = subprocess.run(
             [
                 npx_cmd,
                 "snarkjs",
@@ -74,30 +74,53 @@ def verify_proof():
             text=True
         )
 
-        print("SnarkJS STDOUT:", res.stdout)
-        print("SnarkJS STDERR:", res.stderr)
+        print("========== SNARKJS STDOUT ==========")
+        print(result.stdout)
+        print("========== SNARKJS STDERR ==========")
+        print(result.stderr)
+        print("========== RETURN CODE ==========")
+        print(result.returncode)
 
-        if res.returncode == 0 and "OK!" in res.stdout:
+        # STEP 6: Verification result determine karna
+        if result.returncode == 0 and "OK!" in result.stdout:
             return jsonify({
+                "success": True,
+                "valid": True,
                 "status": "success",
-                "message": "Zero-Knowledge Proof verified successfully by backend verifier node."
+                "message": "Zero-Knowledge Proof verified successfully."
             }), 200
         else:
             return jsonify({
+                "success": True,
+                "valid": False,
                 "status": "error",
-                "message": f"Proof verification failed: {res.stderr or res.stdout}"
+                "message": f"Proof verification failed: {result.stderr or result.stdout}"
             }), 400
-    except Exception as e:
-        print("Verification exception:", str(e))
+
+    except Exception as error:
+        print("========== VERIFICATION ERROR ==========")
+        print(error)
         return jsonify({
-            "status": "error",
-            "message": f"Server execution error during verification: {str(e)}"
+            "success": False,
+            "message": f"Internal verification error: {str(error)}"
         }), 500
 
+    finally:
+        # STEP 7: Temporary Files Cleanup
+        if os.path.exists(proof_path):
+            os.remove(proof_path)
+            print("Temporary proof file deleted.")
 
+        if os.path.exists(public_path):
+            os.remove(public_path)
+            print("Temporary public signals file deleted.")
+
+        print("Temporary files cleanup completed.")
+
+
+# =========================================================
+# APPLICATION START
+# =========================================================
 if __name__ == '__main__':
     print("Starting ZeroTrace Verifier Node on http://127.0.0.1:5000 ...")
     app.run(debug=True, port=5000)
-
-
-
