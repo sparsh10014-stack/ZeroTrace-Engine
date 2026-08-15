@@ -93,11 +93,11 @@ async function handleVerification(event) {
             });
 
             const data = await response.json();
-            if (response.ok && data.status === 'success') {
-                backendVerified = true;
-                backendMessage = data.message;
+            if (response.ok && data.status === 'success' || data.valid === true) {
+                badge.className = "mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500 text-emerald-400 block text-center";
+                badge.innerText = "✅ VERIFIED: NO DATA EXPOSED";
             } else {
-                backendMessage = data.message || "Verification rejected by server.";
+                throw new Error(data.message || "Verification failed");
             }
         } catch (netErr) {
             console.warn("Backend node offline or starting up:", netErr);
