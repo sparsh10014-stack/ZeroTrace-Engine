@@ -4,6 +4,8 @@ import json
 import os
 import subprocess
 
+from database.db_manager import insert_log
+
 app = Flask(__name__, static_folder='Frontend', static_url_path='')
 CORS(app)  # Cross-Origin Resource Sharing enable kar rahe hain.
 
@@ -83,6 +85,8 @@ def verify_proof():
 
         # STEP 6: Verification result determine karna
         if result.returncode == 0 and "OK!" in result.stdout:
+            insert_log("PASS")
+
             return jsonify({
                 "success": True,
                 "valid": True,
@@ -90,6 +94,8 @@ def verify_proof():
                 "message": "Zero-Knowledge Proof verified successfully."
             }), 200
         else:
+            insert_log("FAIL")
+            
             return jsonify({
                 "success": True,
                 "valid": False,

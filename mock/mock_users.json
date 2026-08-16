@@ -1,0 +1,52 @@
+[
+    {
+        "mock_id": "MOCK-001",
+        "age": 22,
+        "expected_status": "PASS"
+    },
+    {
+        "mock_id": "MOCK-002",
+        "age": 25,
+        "expected_status": "PASS"
+    },
+    {
+        "mock_id": "MOCK-003",
+        "age": 19,
+        "expected_status": "PASS"
+    },
+    {
+        "mock_id": "MOCK-004",
+        "age": 30,
+        "expected_status": "PASS"
+    },
+    {
+        "mock_id": "MOCK-005",
+        "age": 18,
+        "expected_status": "PASS"
+    },
+    {
+        "mock_id": "MOCK-006",
+        "age": 17,
+        "expected_status": "FAIL"
+    },
+    {
+        "mock_id": "MOCK-007",
+        "age": 15,
+        "expected_status": "FAIL"
+    },
+    {
+        "mock_id": "MOCK-008",
+        "age": 16,
+        "expected_status": "FAIL"
+    },
+    {
+        "mock_id": "MOCK-009",
+        "age": 14,
+        "expected_status": "FAIL"
+    },
+    {
+        "mock_id": "MOCK-010",
+        "age": 21,
+        "expected_status": "PASS"
+    }
+]

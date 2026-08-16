@@ -381,3 +381,4 @@ function fnvHash(str) {
     shash = '0'.repeat(n).concat(shash);
     return shash;
 }
+
