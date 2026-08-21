@@ -23,17 +23,13 @@ async function handleVerification(event) {
         event.stopPropagation();
     }
 
+    const fileInput = document.getElementById('id-document');
     const userAgeInput = document.getElementById('user-age').value;
-    const userAge = parseInt(userAgeInput);
     const submitBtn = document.getElementById('submit-btn');
     const spinner = document.getElementById('loading-spinner');
+    const spinnerText= document.getElementById('spinner-text');
     const badge = document.getElementById('result-badge');
     const verifierBox = document.getElementById('verifier-status');
-
-    if (isNaN(userAge)) {
-        alert("Please enter a valid age.");
-        return;
-    }
 
     // UI Loading State
     submitBtn.disabled = true;
@@ -42,32 +38,74 @@ async function handleVerification(event) {
     spinner.style.display = 'flex';
     badge.classList.add('hidden');
     badge.style.display = 'none';
+    spinnerText.innerText = "Initializing...";
 
-    try {
+
+   try {
         const currentYear = 2026;
-        const birthYear = currentYear - userAge;
         const ageThreshold = 18;
+        let finalBirthYear;
 
+        // ========================================================
+        // STEP 1: Determine Birth Year (Local OCR vs Manual Input)
+        // ========================================================
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            spinnerText.innerText = "Scanning ID card locally on your device...";
+            const file = fileInput.files[0];
+            
+            try {
+                // Run Tesseract.js locally in the browser
+                const { data: { text } } = await Tesseract.recognize(file, 'eng');
+                
+                // Regex to find a 4-digit year starting with 19 or 20
+                const dobMatch = text.match(/\d{2}[/-]\d{2}[/-]((19|20)\d{2})/);
+                
+                if (dobMatch) {
+                    finalBirthYear = parseInt(dobMatch[1]);
+                    spinnerText.innerText = `Birth Year Extracted: [HIDDEN]. Computing ZKP locally...`;
+                } else {
+                    alert("Could not detect a clear birth year on the uploaded ID. Falling back to manual entry.");
+                    if (isNaN(parseInt(userAgeInput))) throw new Error("Invalid manual age fallback.");
+                    finalBirthYear = currentYear - parseInt(userAgeInput);
+                }
+            } catch (ocrError) {
+                console.error("OCR Error:", ocrError);
+                throw new Error("Failed to scan document. Please try a clearer image.");
+            }
+        } else {
+            // No file uploaded, use manual entry
+            if (isNaN(parseInt(userAgeInput))) {
+                throw new Error("Please enter a valid age or upload a document.");
+            }
+            finalBirthYear = currentYear - parseInt(userAgeInput);
+            spinnerText.innerText = "Computing Zero-Knowledge Proof locally...";
+        }
+
+        // ========================================================
+        // STEP 2: Configure Circuit Inputs
+        // ========================================================
         const circuitInputs = {
             current_year: currentYear,
-            birth_year: birthYear,
+            birth_year: finalBirthYear,
             age_threshold: ageThreshold
         };
-
-        console.log("Computing Zero-Knowledge Proof locally in browser...");
 
         if (typeof snarkjs === 'undefined') {
             throw new Error("SnarkJS SDK is not loaded. Please check your internet connection.");
         }
 
-        // 1. Generate Local ZKP Proof
+        // ========================================================
+        // STEP 3: Generate Local ZKP Proof
+        // ========================================================
         const { proof, publicSignals } = await snarkjs.groth16.fullProve(
             circuitInputs,
             "Public/age_check.wasm",
             "Public/age_check_final.zkey"
         );
 
-        // 2. Perform Local Client Verification
+        // ========================================================
+        // STEP 4: Perform Local Client Verification (Optional Check)
+        // ========================================================
         let isLocallyVerified = false;
         try {
             const vKeyRes = await fetch("Public/verification_key.json");
@@ -79,10 +117,13 @@ async function handleVerification(event) {
             console.warn("Local verification key check skipped:", localErr);
         }
 
-        // 3. Post Proof to Flask Verifier Server
+        // ========================================================
+        // STEP 5: Post Proof to Flask Verifier Server
+        // ========================================================
         let backendVerified = false;
         let backendMessage = "";
         try {
+            spinnerText.innerText = "Sending Proof to Verifier Node...";
             const response = await fetch('http://127.0.0.1:5000/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -94,8 +135,8 @@ async function handleVerification(event) {
 
             const data = await response.json();
             if (response.ok && data.status === 'success' || data.valid === true) {
-                badge.className = "mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500 text-emerald-400 block text-center";
-                badge.innerText = "✅ VERIFIED: NO DATA EXPOSED";
+                backendVerified = true;
+                backendMessage = data.message || "Confirmed valid by Verifier Node";
             } else {
                 throw new Error(data.message || "Verification failed");
             }
@@ -104,7 +145,9 @@ async function handleVerification(event) {
             backendMessage = "Proof verified locally in browser.";
         }
 
-        // 4. Update UI Badge & Verifier Monitor
+        // ========================================================
+        // STEP 6: Update UI Badge & Verifier Monitor
+        // ========================================================
         if (backendVerified || isLocallyVerified) {
             badge.className = "mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500 text-emerald-400 text-center shadow-lg transition-all";
             badge.classList.remove('hidden');
@@ -113,7 +156,7 @@ async function handleVerification(event) {
                 <div class="text-3xl mb-1">✅</div>
                 <div class="font-bold text-xl text-emerald-400">VERIFIED: AGE >= 18</div>
                 <div class="text-xs text-emerald-300/80 mt-1">Zero-Knowledge Proof verified — Zero private data exposed!</div>
-                <div class="text-[11px] text-emerald-400/60 mt-1 font-mono">${backendMessage || "Confirmed valid by Verifier Node"}</div>
+                <div class="text-[11px] text-emerald-400/60 mt-1 font-mono">${backendMessage}</div>
             `;
 
             if (verifierBox) {
@@ -153,9 +196,11 @@ async function handleVerification(event) {
             `;
         }
     } finally {
+        // Reset UI State
         submitBtn.disabled = false;
         submitBtn.classList.remove('opacity-50');
         spinner.classList.add('hidden');
         spinner.style.display = 'none';
+        spinnerText.innerText = "Processing locally..."; // Reset default text
     }
 }

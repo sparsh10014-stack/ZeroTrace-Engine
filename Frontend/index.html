@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SnarkJS Browser SDK -->
     <script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.0/build/snarkjs.min.js"></script>
+    <!-- Tesseract.js for Browser-Side OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
 
@@ -30,12 +32,32 @@
         <section id="screen-user" class="space-y-6">
             <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
                 <h2 class="text-xl font-bold mb-2 text-white">Age Verification Portal</h2>
-                <p class="text-slate-400 text-sm mb-6">Generate a ZKP proof locally in your browser. Your private age data never leaves your device.</p>
+                <p class="text-slate-400 text-sm mb-6">Scan your ID locally or enter your details. Your private data never leaves your device.</p>
 
-                <!-- NO FORM TAG = ZERO PAGE RELOADS -->
-                <div class="space-y-4">
+                <div class="space-y-5">
+                    <!-- Option 1: Document Upload (Local OCR) -->
+                    <div class="bg-slate-900/60 border border-slate-700/80 rounded-xl p-4 space-y-3">
+                        <label class="block text-sm font-medium text-slate-300">
+                            📄 Option A: Scan Government ID / Aadhaar Card (Local OCR)
+                        </label>
+                        <p class="text-xs text-slate-500">
+                            Upload an image of your ID. Text extraction runs 100% inside your browser.
+                        </p>
+                        <input type="file" id="id-document" accept="image/png, image/jpeg, image/jpg"
+                            class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600/20 file:text-blue-400 hover:file:bg-blue-600/30 cursor-pointer border border-slate-700 rounded-lg bg-slate-900 p-1">
+                    </div>
+
+                    <div class="relative flex py-1 items-center">
+                        <div class="flex-grow border-t border-slate-700"></div>
+                        <span class="flex-shrink mx-4 text-xs text-slate-500 font-semibold uppercase">OR</span>
+                        <div class="flex-grow border-t border-slate-700"></div>
+                    </div>
+
+                    <!-- Option 2: Manual Entry -->
                     <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-300">Enter Your Age:</label>
+                        <label class="block text-sm font-medium mb-1 text-slate-300">
+                            🔢 Option B: Manual Age Input
+                        </label>
                         <input type="number" id="user-age" placeholder="e.g. 22" min="1" max="120" value="22"
                             class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
@@ -45,10 +67,10 @@
                     </button>
                 </div>
 
-                <!-- Loading Spinner -->
+                <!-- Loading Spinner & Step Status -->
                 <div id="loading-spinner" class="hidden mt-6 p-4 bg-slate-900 border border-blue-500/30 rounded-xl flex items-center space-x-3">
                     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400"></div>
-                    <span class="text-sm text-blue-300">Computing Zero-Knowledge Proof locally...</span>
+                    <span id="spinner-text" class="text-sm text-blue-300">Processing locally...</span>
                 </div>
 
                 <!-- Result Badge -->
