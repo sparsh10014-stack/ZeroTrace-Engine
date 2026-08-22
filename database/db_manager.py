@@ -6,6 +6,7 @@ DATABASE_FOLDER = Path(__file__).resolve().parent
 
 DATABASE_PATH = DATABASE_FOLDER / "verification_logs.db"
 
+
 def insert_log(status):
     """
     Insert a verification result into the database.
@@ -22,7 +23,7 @@ def insert_log(status):
         cursor = connection.cursor()
 
         cursor.execute(
-            "INSERT INTO verification_logs (Status) VALUES (?)",
+            "INSERT INTO verification_logs (Timestamp, Status) VALUES (datetime('now', 'localtime'), ?)",
             (status,)
         )
 
