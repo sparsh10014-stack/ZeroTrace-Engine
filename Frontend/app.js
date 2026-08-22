@@ -56,9 +56,19 @@ async function handleVerification(event) {
             try {
                 // Run Tesseract.js locally in the browser
                 const { data: { text } } = await Tesseract.recognize(file, 'eng');
+
+                console.log("RAW OCR TEXT: ", text);
                 
                 // Regex to find a 4-digit year starting with 19 or 20
-                const dobMatch = text.match(/\d{2}[/-]\d{2}[/-]((19|20)\d{2})/);
+                let dobMatch = text.match(/\d{1,2}\s*[./-]\s*\d{1,2}\s*[./-]\s*((19|20)\d{2})/);
+                 
+        if (!dobMatch) {
+            // This looks for "DOB", "DB", or "DATE", skips the messy numbers, and grabs the 2018
+                      dobMatch = text.match(/(?:DOB|DB|DATE)\s*.*?((19|20)\d{2})/i);
+        }
+         
+
+                
                 
                 if (dobMatch) {
                     finalBirthYear = parseInt(dobMatch[1]);
