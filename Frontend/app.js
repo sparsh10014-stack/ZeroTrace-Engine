@@ -17,6 +17,60 @@ function switchTab(tab) {
     }
 }
 
+// ========================================================
+// SPARSH PHASE 3: Client-Side Signature Verification
+// ========================================================
+async function verifyDigiLockerCredential(credential) {
+    if (typeof circomlibjs === 'undefined') {
+        throw new Error("circomlibjs not loaded. Check index.html CDN script.");
+    }
+
+    const eddsa = await circomlibjs.buildEddsa();
+    const poseidon = await circomlibjs.buildPoseidon();
+    const babyJub = await circomlibjs.buildBabyjub();
+
+    // 1. Check Revocation and Expiry Flags first
+    if (credential.credential_data.is_active !== 1) {
+        throw new Error("CREDENTIAL REVOKED: This ID has been invalidated by the issuer.");
+    }
+    const currentUnixTime = Math.floor(Date.now() / 1000);
+    if (credential.credential_data.expiry < currentUnixTime) {
+        throw new Error("CREDENTIAL EXPIRED: Issued credential has expired.");
+    }
+
+    // 2. Re-compute Poseidon Hash of payload
+    const payload = [
+        BigInt(credential.credential_data.id_hash),
+        BigInt(credential.credential_data.dob_year),
+        BigInt(credential.credential_data.expiry),
+        BigInt(credential.credential_data.is_active)
+    ];
+    const messageHash = poseidon(payload);
+
+    // 3. Unpack public key and signature
+    const pubKey = [
+        babyJub.F.e(credential.issuer_pubkey[0]),
+        babyJub.F.e(credential.issuer_pubkey[1])
+    ];
+    const signature = {
+        R8: [
+            babyJub.F.e(credential.signature.R8[0]),
+            babyJub.F.e(credential.signature.R8[1])
+        ],
+        S: BigInt(credential.signature.S)
+    };
+
+    // 4. Verify Signature
+    const isValid = eddsa.verifyPoseidon(messageHash, signature, pubKey);
+    if (!isValid) {
+        throw new Error("FORGERY DETECTED: Invalid signature from issuer!");
+    }
+
+    // Return the cryptographically trusted DOB
+    return credential.credential_data.dob_year;
+}
+
+
 async function handleVerification(event) {
     if (event && typeof event.preventDefault === 'function') {
         event.preventDefault();
@@ -24,7 +78,6 @@ async function handleVerification(event) {
     }
 
     const fileInput = document.getElementById('id-document');
-    const userAgeInput = document.getElementById('user-age').value;
     const submitBtn = document.getElementById('submit-btn');
     const spinner = document.getElementById('loading-spinner');
     const spinnerText= document.getElementById('spinner-text');
@@ -40,14 +93,13 @@ async function handleVerification(event) {
     badge.style.display = 'none';
     spinnerText.innerText = "Initializing...";
 
-
-   try {
+    try {
         const currentYear = 2026;
         const ageThreshold = 18;
-        let finalBirthYear;
+        let ocrExtractedIdHash = "123456789012345"; // Default fallback for demo if OCR ID isn't parsed perfectly
 
         // ========================================================
-        // STEP 1: Determine Birth Year (Local OCR vs Manual Input)
+        // STEP 1: Local OCR Check (Snehlata's Flow)
         // ========================================================
         if (fileInput && fileInput.files && fileInput.files.length > 0) {
             spinnerText.innerText = "Scanning ID card locally on your device...";
@@ -56,57 +108,71 @@ async function handleVerification(event) {
             try {
                 // Run Tesseract.js locally in the browser
                 const { data: { text } } = await Tesseract.recognize(file, 'eng');
-
                 console.log("RAW OCR TEXT: ", text);
                 
-                // Regex to find a 4-digit year starting with 19 or 20
-                let dobMatch = text.match(/\d{1,2}\s*[./-]\s*\d{1,2}\s*[./-]\s*((19|20)\d{2})/);
-                 
-        if (!dobMatch) {
-            // This looks for "DOB", "DB", or "DATE", skips the messy numbers, and grabs the 2018
-                      dobMatch = text.match(/(?:DOB|DB|DATE)\s*.*?((19|20)\d{2})/i);
-        }
-         
-
-                
-                
-                if (dobMatch) {
-                    finalBirthYear = parseInt(dobMatch[1]);
-                    spinnerText.innerText = `Birth Year Extracted: [HIDDEN]. Computing ZKP locally...`;
-                } else {
-                    alert("Could not detect a clear birth year on the uploaded ID. Falling back to manual entry.");
-                    if (isNaN(parseInt(userAgeInput))) throw new Error("Invalid manual age fallback.");
-                    finalBirthYear = currentYear - parseInt(userAgeInput);
-                }
+                // For this demo, we assume the document is valid enough to proceed to mock issuer
+                spinnerText.innerText = "Document scanned successfully.";
             } catch (ocrError) {
                 console.error("OCR Error:", ocrError);
                 throw new Error("Failed to scan document. Please try a clearer image.");
             }
         } else {
-            // No file uploaded, use manual entry
-            if (isNaN(parseInt(userAgeInput))) {
-                throw new Error("Please enter a valid age or upload a document.");
-            }
-            finalBirthYear = currentYear - parseInt(userAgeInput);
-            spinnerText.innerText = "Computing Zero-Knowledge Proof locally...";
+            throw new Error("Please upload an ID document to proceed.");
         }
 
         // ========================================================
-        // STEP 2: Configure Circuit Inputs
+        // STEP 2: Phase 4 - Request Challenge Nonce
+        // ========================================================
+        spinnerText.innerText = "Requesting verification challenge...";
+        let nonce = "12345"; // Fallback nonce in case backend endpoint isn't fully ready
+        try {
+            const nonceRes = await fetch('http://127.0.0.1:5000/api/get-nonce');
+            if (nonceRes.ok) {
+                const nonceData = await nonceRes.json();
+                nonce = nonceData.nonce;
+            }
+        } catch (e) {
+            console.warn("Nonce endpoint unavailable, using mock nonce for demo.");
+        }
+
+        // ========================================================
+        // STEP 3: Phase 2 Integration - Fetch Signed Credential
+        // ========================================================
+        spinnerText.innerText = "Fetching signed credential from mock DigiLocker...";
+        let credential;
+        try {
+            const credentialResponse = await fetch('http://127.0.0.1:5000/api/issue-credential', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ocr_id_hash: ocrExtractedIdHash })
+            });
+            if (!credentialResponse.ok) throw new Error("ID not found or revoked in government database.");
+            credential = await credentialResponse.json();
+        } catch (e) {
+            throw new Error(e.message || "Failed to connect to Mock DigiLocker Issuer.");
+        }
+
+        // ========================================================
+        // STEP 4: Phase 3 - Verify EdDSA Signature Locally
+        // ========================================================
+        spinnerText.innerText = "Verifying DigiLocker signature locally...";
+        const trustedDobYear = await verifyDigiLockerCredential(credential);
+
+        // ========================================================
+        // STEP 5: Configure Circuit Inputs & Generate ZKP
         // ========================================================
         const circuitInputs = {
             current_year: currentYear,
-            birth_year: finalBirthYear,
-            age_threshold: ageThreshold
+            birth_year: trustedDobYear,
+            age_threshold: ageThreshold,
+            nonce: nonce
         };
 
         if (typeof snarkjs === 'undefined') {
             throw new Error("SnarkJS SDK is not loaded. Please check your internet connection.");
         }
 
-        // ========================================================
-        // STEP 3: Generate Local ZKP Proof
-        // ========================================================
+        spinnerText.innerText = "Computing Zero-Knowledge Proof locally...";
         const { proof, publicSignals } = await snarkjs.groth16.fullProve(
             circuitInputs,
             "Public/age_check.wasm",
@@ -114,7 +180,7 @@ async function handleVerification(event) {
         );
 
         // ========================================================
-        // STEP 4: Perform Local Client Verification (Optional Check)
+        // STEP 6: Perform Local Client Verification (Optional Check)
         // ========================================================
         let isLocallyVerified = false;
         try {
@@ -128,35 +194,36 @@ async function handleVerification(event) {
         }
 
         // ========================================================
-        // STEP 5: Post Proof to Flask Verifier Server
+        // STEP 7: Post Proof to Flask Verifier Server
         // ========================================================
         let backendVerified = false;
         let backendMessage = "";
         try {
             spinnerText.innerText = "Sending Proof to Verifier Node...";
-            const response = await fetch('http://127.0.0.1:5000/verify', {
+            const response = await fetch('http://127.0.0.1:5000/api/verify-proof', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     proof: proof,
-                    publicSignals: publicSignals
+                    publicSignals: publicSignals,
+                    nonce: nonce
                 })
             });
 
             const data = await response.json();
-            if (response.ok && data.status === 'success' || data.valid === true) {
+            if (response.ok && (data.status === 'success' || data.valid === true)) {
                 backendVerified = true;
                 backendMessage = data.message || "Confirmed valid by Verifier Node";
             } else {
-                throw new Error(data.message || "Verification failed");
+                throw new Error(data.message || "Verification failed at server.");
             }
         } catch (netErr) {
             console.warn("Backend node offline or starting up:", netErr);
-            backendMessage = "Proof verified locally in browser.";
+            backendMessage = "Proof verified locally in browser. (Backend unreachable)";
         }
 
         // ========================================================
-        // STEP 6: Update UI Badge & Verifier Monitor
+        // STEP 8: Update UI Badge & Verifier Monitor
         // ========================================================
         if (backendVerified || isLocallyVerified) {
             badge.className = "mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500 text-emerald-400 text-center shadow-lg transition-all";
@@ -201,7 +268,7 @@ async function handleVerification(event) {
             verifierBox.className = "p-8 border-2 border-rose-500 bg-rose-500/10 rounded-xl text-rose-400 font-bold text-lg shadow-lg text-center";
             verifierBox.innerHTML = `
                 <div class="text-2xl mb-1">⚠️</div>
-                <div>REJECTED: AGE CHECK FAILED</div>
+                <div>REJECTED</div>
                 <div class="text-xs font-normal text-rose-300/80 mt-1">${userMsg}</div>
             `;
         }
@@ -211,6 +278,6 @@ async function handleVerification(event) {
         submitBtn.classList.remove('opacity-50');
         spinner.classList.add('hidden');
         spinner.style.display = 'none';
-        spinnerText.innerText = "Processing locally..."; // Reset default text
+        spinnerText.innerText = "Processing locally..."; 
     }
 }
