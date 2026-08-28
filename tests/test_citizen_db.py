@@ -68,3 +68,19 @@ def test_revoke_already_revoked_citizen(tmp_path, monkeypatch):
     citizen = citizen_db.get_citizen_by_id("TEST002")
 
     assert citizen["active"] is False
+
+def test_valid_citizen_response_has_exact_fields(tmp_path, monkeypatch):
+    db_path = create_test_database(tmp_path)
+
+    monkeypatch.setattr(citizen_db, "DB_PATH", db_path)
+
+    citizen = citizen_db.get_citizen_by_id("TEST001")
+
+    assert citizen is not None
+
+    assert set(citizen.keys()) == {
+        "id_number",
+        "name",
+        "date_of_birth",
+        "active"
+    }
