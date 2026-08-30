@@ -11,7 +11,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "big-integer": "^1.6.52",
     "circomlib": "^2.0.5",
-    "circomlibjs": "^0.0.8"
+    "circomlibjs": "^0.1.7"
   }
 }

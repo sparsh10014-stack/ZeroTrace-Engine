@@ -1,98 +1,418 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZeroTrace | ZKP Verification</title>
-    <!-- Tailwind CSS CDN -->
+
+    <title>ZeroTrace | Age Verification</title>
+
+    <!-- =====================================================
+         Tailwind CSS
+         Used for styling the ZeroTrace UI.
+    ====================================================== -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SnarkJS Browser SDK -->
+
+
+    <!-- =====================================================
+         SnarkJS
+         Used in the browser to generate and verify
+         the Groth16 Zero-Knowledge Proof.
+    ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.0/build/snarkjs.min.js"></script>
-    <!-- Tesseract.js for Browser-Side OCR -->
+
+
+    <!-- =====================================================
+         Tesseract.js
+         Performs OCR locally inside the user's browser.
+
+         IMPORTANT:
+         The uploaded image is NOT sent to the Flask server.
+    ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
+
+    <!-- =====================================================
+         CircomlibJS
+         Used for EdDSA / Poseidon cryptographic operations.
+    ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/circomlibjs@0.1.7/build/circomlibjs.min.js"></script>
+
 </head>
+
+
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
 
-    <!-- Navigation Bar -->
-    <nav class="border-b border-slate-800 bg-slate-950 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center space-x-2">
-            <span class="text-xl">🛡️</span>
-            <span class="text-xl font-bold text-blue-400">ZeroTrace Engine</span>
-        </div>
-        <div class="space-x-4">
-            <button onclick="switchTab('user')" id="btn-user" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-semibold transition">User Portal</button>
-            <button onclick="switchTab('verifier')" id="btn-verifier" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-semibold text-slate-300 transition">Verifier Dashboard</button>
-        </div>
-    </nav>
 
-    <!-- Main Container -->
-    <main class="max-w-2xl mx-auto mt-10 p-6">
-        
-        <!-- User Screen -->
-        <section id="screen-user" class="space-y-6">
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
-                <h2 class="text-xl font-bold mb-2 text-white">Age Verification Portal</h2>
-                <p class="text-slate-400 text-sm mb-6">Scan your ID locally or enter your details. Your private data never leaves your device.</p>
+<!-- =========================================================
+     NAVIGATION BAR
+========================================================= -->
 
-                <div class="space-y-5">
-                    <!-- Option 1: Document Upload (Local OCR) -->
-                    <div class="bg-slate-900/60 border border-slate-700/80 rounded-xl p-4 space-y-3">
-                        <label class="block text-sm font-medium text-slate-300">
-                            📄 Option A: Scan Government ID / Aadhaar Card (Local OCR)
-                        </label>
-                        <p class="text-xs text-slate-500">
-                            Upload an image of your ID. Text extraction runs 100% inside your browser.
-                        </p>
-                        <input type="file" id="id-document" accept="image/png, image/jpeg, image/jpg"
-                            class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600/20 file:text-blue-400 hover:file:bg-blue-600/30 cursor-pointer border border-slate-700 rounded-lg bg-slate-900 p-1">
-                    </div>
+<nav
+    class="border-b border-slate-800 bg-slate-950
+           px-6 py-4 flex justify-between items-center">
 
-                    <div class="relative flex py-1 items-center">
-                        <div class="flex-grow border-t border-slate-700"></div>
-                        <span class="flex-shrink mx-4 text-xs text-slate-500 font-semibold uppercase">OR</span>
-                        <div class="flex-grow border-t border-slate-700"></div>
-                    </div>
+    <!-- Project name -->
+    <div class="text-xl font-bold text-blue-400">
+        🛡️ ZeroTrace Engine
+    </div>
 
-                    <!-- Option 2: Manual Entry -->
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-300">
-                            🔢 Option B: Manual Age Input
-                        </label>
-                        <input type="number" id="user-age" placeholder="e.g. 22" min="1" max="120" value="22"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
-                    </div>
 
-                    <button type="button" onclick="handleVerification(event)" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg shadow-lg transition">
-                        Generate & Verify ZKP
-                    </button>
-                </div>
+    <!-- Navigation buttons -->
+    <div class="space-x-3">
 
-                <!-- Loading Spinner & Step Status -->
-                <div id="loading-spinner" class="hidden mt-6 p-4 bg-slate-900 border border-blue-500/30 rounded-xl flex items-center space-x-3">
-                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400"></div>
-                    <span id="spinner-text" class="text-sm text-blue-300">Processing locally...</span>
-                </div>
+        <!-- User Portal -->
+        <button
+            onclick="switchTab('user')"
+            id="btn-user"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-500
+                   rounded-lg text-sm font-semibold transition">
 
-                <!-- Result Badge -->
-                <div id="result-badge" class="hidden mt-6 p-4 rounded-xl font-bold text-center transition-all"></div>
+            User Portal
+
+        </button>
+
+
+        <!-- Verifier Dashboard -->
+        <button
+            onclick="switchTab('verifier')"
+            id="btn-verifier"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700
+                   rounded-lg text-sm font-semibold transition">
+
+            Verifier Dashboard
+
+        </button>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
+
+<main class="max-w-2xl mx-auto mt-10 p-6">
+
+
+    <!-- =====================================================
+         USER PORTAL
+    ====================================================== -->
+
+    <section id="screen-user">
+
+        <div
+            class="bg-slate-800 border border-slate-700
+                   rounded-2xl p-6 shadow-xl">
+
+
+            <!-- Heading -->
+            <h2 class="text-xl font-bold mb-2 text-white">
+
+                Age Verification Portal
+
+            </h2>
+
+
+            <!-- Description -->
+            <p class="text-slate-400 text-sm mb-6">
+
+                Upload your government ID.
+                OCR runs locally in your browser and
+                your raw document is discarded after extraction.
+
+            </p>
+
+
+
+            <!-- =================================================
+                 DOCUMENT UPLOAD
+            ================================================== -->
+
+            <div
+                class="bg-slate-900 border border-slate-700
+                       rounded-xl p-4">
+
+                <label
+                    for="id-document"
+                    class="block text-sm font-medium mb-2">
+
+                    📄 Upload Government ID
+
+                </label>
+
+
+                <!--
+                    User selects the ID document.
+
+                    Only image files are accepted.
+                    The image stays inside the browser.
+                -->
+
+                <input
+                    type="file"
+                    id="id-document"
+                    accept="image/png,image/jpeg,image/jpg"
+                    class="w-full text-sm text-slate-400
+
+                           file:mr-4
+                           file:py-2
+                           file:px-4
+
+                           file:rounded-lg
+                           file:border-0
+
+                           file:bg-blue-600
+                           file:text-white
+
+                           hover:file:bg-blue-500
+
+                           cursor-pointer"
+                />
+
+
+                <!-- Privacy guarantee -->
+                <p class="text-xs text-slate-500 mt-2">
+
+                    🔒 Image is processed locally
+                    and discarded immediately after OCR.
+
+                </p>
+
             </div>
-        </section>
 
-        <!-- Verifier Dashboard Screen -->
-        <section id="screen-verifier" class="hidden space-y-6">
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 text-center shadow-xl">
-                <h2 class="text-xl font-bold mb-2 text-white">Verifier Real-Time Monitor</h2>
-                <p class="text-slate-400 text-sm mb-6">Shows live verification results from incoming client proofs.</p>
-                <div id="verifier-status" class="p-8 border-2 border-dashed border-slate-700 rounded-xl text-slate-500">
-                    Awaiting proof verification request...
+
+
+            <!-- =================================================
+                 START VERIFICATION BUTTON
+            ================================================== -->
+
+            <button
+                id="submit-btn"
+                type="button"
+                onclick="handleVerification(event)"
+                class="w-full mt-5 bg-blue-600
+                       hover:bg-blue-500
+                       text-white font-semibold
+                       py-3 rounded-lg
+                       transition">
+
+                Generate & Verify ZKP
+
+            </button>
+
+
+
+            <!-- =================================================
+                 PROCESSING STATUS
+            ================================================== -->
+
+            <div
+                id="loading-spinner"
+                class="hidden mt-6 p-4
+                       bg-slate-900
+                       border border-blue-500/30
+                       rounded-xl">
+
+
+                <div class="flex items-center gap-3">
+
+
+                    <!-- Loading animation -->
+                    <div
+                        class="animate-spin
+                               rounded-full
+                               h-5 w-5
+                               border-b-2
+                               border-blue-400">
+                    </div>
+
+
+                    <!-- Dynamic status message -->
+                    <span
+                        id="spinner-text"
+                        class="text-sm text-blue-300">
+
+                        Processing...
+
+                    </span>
+
                 </div>
+
             </div>
-        </section>
 
-    </main>
 
-    <script src="app.js"></script>
+
+            <!-- =================================================
+                 RESULT MESSAGE
+
+                 JavaScript will dynamically display:
+
+                 ✅ Credential issued
+                 ❌ ID not found
+                 ❌ ID revoked
+                 ❌ OCR/database mismatch
+                 ❌ Verification failed
+            ================================================== -->
+
+            <div
+                id="result-badge"
+                class="hidden mt-6 p-5 rounded-xl
+                       text-center">
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         VERIFIER DASHBOARD
+
+         Judges can see the complete pipeline:
+
+         OCR
+          ↓
+         Issuer
+          ↓
+         Proof
+          ↓
+         Verify
+    ====================================================== -->
+
+    <section
+        id="screen-verifier"
+        class="hidden">
+
+
+        <div
+            class="bg-slate-800
+                   border border-slate-700
+                   rounded-2xl
+                   p-6
+                   shadow-xl">
+
+
+            <!-- Dashboard heading -->
+
+            <h2 class="text-xl font-bold mb-2 text-white">
+
+                Verifier Real-Time Monitor
+
+            </h2>
+
+
+            <p class="text-slate-400 text-sm mb-6">
+
+                Live ZeroTrace verification pipeline.
+
+            </p>
+
+
+
+            <!-- =================================================
+                 PIPELINE STAGES
+            ================================================== -->
+
+            <div class="space-y-3">
+
+
+                <!-- =================================================
+                     STAGE 1 — OCR
+                ================================================== -->
+
+                <div
+                    id="stage-ocr"
+                    class="stage p-4 rounded-lg
+                           bg-slate-900
+                           border border-slate-700
+                           transition">
+
+                    🔍 OCR — Waiting
+
+                </div>
+
+
+
+                <!-- =================================================
+                     STAGE 2 — MOCK ISSUER
+                ================================================== -->
+
+                <div
+                    id="stage-issuer"
+                    class="stage p-4 rounded-lg
+                           bg-slate-900
+                           border border-slate-700
+                           transition">
+
+                    🪪 Issuer — Waiting
+
+                </div>
+
+
+
+                <!-- =================================================
+                     STAGE 3 — ZKP GENERATION
+                ================================================== -->
+
+                <div
+                    id="stage-proof"
+                    class="stage p-4 rounded-lg
+                           bg-slate-900
+                           border border-slate-700
+                           transition">
+
+                    🔐 Proof — Waiting
+
+                </div>
+
+
+
+                <!-- =================================================
+                     STAGE 4 — VERIFICATION
+                ================================================== -->
+
+                <div
+                    id="stage-verify"
+                    class="stage p-4 rounded-lg
+                           bg-slate-900
+                           border border-slate-700
+                           transition">
+
+                    ✅ Verify — Waiting
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+
+<!-- =========================================================
+     FRONTEND JAVASCRIPT
+
+     app.js contains:
+
+     1. OCR
+     2. OCR → ID extraction
+     3. Credential request
+     4. Credential validation
+     5. ZKP generation
+     6. Proof submission
+     7. Dashboard updates
+========================================================= -->
+
+<script src="app.js"></script>
+
+
 </body>
 </html>
