@@ -3,16 +3,93 @@ from flask_cors import CORS
 import json
 import os
 import subprocess
+import sqlite3
+import uuid
+
+
 
 from database.db_manager import insert_log
 
 app = Flask(__name__, static_folder='Frontend', static_url_path='')
 CORS(app)  # Cross-Origin Resource Sharing enable kar rahe hain.
 
+# =========================================================
+# SERVER STATE (In-Memory Nonce Storage for Phase 4)
+# =========================================================
+active_nonces = set()
 
+def get_citizen_record(id_hash):
+
+    try:
+        # SQLite database connection establish kar rahe hain.
+        conn = sqlite3.connect('database/verification_log.db')
+        cursor = conn.cursor()
+
+        # Citizen record ko fetch karne ke liye SQL query execute kar rahe hain.
+        cursor.execute("SELECT dob_year ,expiry , is_active FROM citizens WHERE id_hash = ?", (id_hash,))
+        record = cursor.fetchone()
+
+        return record
+
+    except sqlite3.OperationalError :
+        
+        return (2005,1772150400,1)
+
+    
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
+
+
+# =========================================================
+# PHASE 4: NONCE GENERATOR (Replay Protection)
+# =========================================================
+@app.route('/api/get-nonce', methods=['GET'])
+def get_nonce():
+    # Unique nonce generate kar rahe hain.
+    nonce = str(uuid.uuid4())
+    active_nonces.add(nonce)
+
+    return jsonify({
+        "nonce": nonce
+    }), 200
+
+# =========================================================
+# PHASE 1 & 3: MOCK ISSUER & REVOCATION LOOKUP
+# =========================================================
+
+@app.route('/api/issue-credential',methods=['POST'])
+def issue_credential():
+    data =  request.json
+    client_id_hash = data.get("ocr_id_hash")
+
+    # 1. Look up the OCR-extracted ID in Sachin's dummy database
+    record = get_citizen_record(client_id_hash)
+
+    if not record:
+        return jsonify({"error":"ID not found in the database"}), 404
+
+    dob_year, expiry, is_active = record
+
+    # 2. Check if the credential is valid
+    if is_active == 0:
+        return jsonify({"error":"Credential is revoked"}), 403
+
+    #3.call sparsh's mock issuer API to issue the credential
+    try:
+        process = subprocess.run(
+            ['node', '-e', f"""
+                const signer = require('./issuer_signer.js');
+                signer.generateSignedCredential('{client_id_hash}', {dob_year}, {expiry}, {is_active})
+                .then(res => console.log(JSON.stringify(res)));
+            """],
+            capture_output=True,text=True, check=True 
+            )
+        signed_credential = json.loads(process.stdout)
+        return jsonify(signed_credential), 200
+
+    except Exception as e:
+        return jsonify({"error": "Failed to generate digital signature", "details": str(e)}), 500
 
 
 # =========================================================
@@ -33,13 +110,36 @@ def verify_proof():
     # STEP 2: Proof aur Public Signals nikalna
     proof = payload.get('proof')
     public_signals = payload.get('publicSignals')
+    client_nonce = payload.get('nonce')
 
-    # Agar proof ya public signals missing hain to request reject kar do.
+    # STEP 1: Nonce Replay Protection Check
+    if client_nonce not in active_nonces:
+        insert_log("FAIL")
+        return jsonify({"status": "error", "message": "Invalid or expired challenge nonce! Replay attack detected."}), 403
+
+    # Mark nonce as used so it can never be used again
+    active_nonces.remove(client_nonce)
+
     if proof is None or public_signals is None:
-        return jsonify({
-            "status": "error",
-            "message": "Missing proof or public signals"
-        }), 400
+        return jsonify({"status": "error", "message": "Missing proof or public signals"}), 400
+
+    os.makedirs("temp", exist_ok=True)
+    proof_path = os.path.join("temp", "proof.json")
+    public_path = os.path.join("temp", "public.json")
+
+
+
+
+
+
+
+
+    # # Agar proof ya public signals missing hain to request reject kar do.
+    # if proof is None or public_signals is None:
+    #     return jsonify({
+    #         "status": "error",
+    #         "message": "Missing proof or public signals"
+    #     }), 400
 
     # Temporary folder ko ensure kar rahe hain.
     os.makedirs("temp", exist_ok=True)
@@ -76,12 +176,12 @@ def verify_proof():
             text=True
         )
 
-        print("========== SNARKJS STDOUT ==========")
-        print(result.stdout)
-        print("========== SNARKJS STDERR ==========")
-        print(result.stderr)
-        print("========== RETURN CODE ==========")
-        print(result.returncode)
+        # print("========== SNARKJS STDOUT ==========")
+        # print(result.stdout)
+        # print("========== SNARKJS STDERR ==========")
+        # print(result.stderr)
+        # print("========== RETURN CODE ==========")
+        # print(result.returncode)
 
         # STEP 6: Verification result determine karna
         if result.returncode == 0 and "OK!" in result.stdout:
