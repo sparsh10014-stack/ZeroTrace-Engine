@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroTrace - Onboarding 1</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+
+        /* =========================
+           ONBOARDING SCREEN
+        ========================== */
+
+        .onboarding-screen {
+            width: 243px;
+            height: 526px;
+
+            position: relative;
+
+            background: linear-gradient(
+                180deg,
+                #061526 0%,
+                #0a2048 48%,
+                #173b80 100%
+            );
+
+            color: white;
+            overflow: hidden;
+        }
+
+
+        /* =========================
+           SHIELD
+        ========================== */
+
+        .shield {
+            position: absolute;
+
+            top: 178px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 74px;
+            height: 82px;
+
+            background: linear-gradient(
+                145deg,
+                #ffffff,
+                #c9c9c9
+            );
+
+            clip-path: polygon(
+                50% 0%,
+                67% 9%,
+                84% 4%,
+                100% 20%,
+                91% 43%,
+                100% 68%,
+                88% 82%,
+                68% 92%,
+                50% 100%,
+                32% 92%,
+                12% 82%,
+                0% 68%,
+                9% 43%,
+                0% 20%,
+                16% 4%,
+                33% 9%
+            );
+        }
+
+
+        /* =========================
+           TEXT
+        ========================== */
+
+        .title {
+            position: absolute;
+
+            top: 289px;
+            left: 0;
+
+            width: 100%;
+
+            text-align: center;
+
+            font-size: 15px;
+            font-weight: 700;
+
+            margin: 0;
+        }
+
+        .description {
+            position: absolute;
+
+            top: 322px;
+            left: 0;
+
+            width: 100%;
+
+            text-align: center;
+
+            font-size: 8.5px;
+            font-weight: 400;
+
+            color: #d8deeb;
+
+            margin: 0;
+        }
+
+
+        /* =========================
+           SLIDE INDICATORS
+        ========================== */
+
+        .dots {
+            position: absolute;
+
+            top: 373px;
+            left: 0;
+
+            width: 100%;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            gap: 10px;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+
+            border-radius: 50%;
+
+            background: #64718b;
+        }
+
+        .dot.active {
+            background: #ffffff;
+        }
+
+
+        /* =========================
+           NEXT BUTTON
+        ========================== */
+
+        .next-button {
+            position: absolute;
+
+            top: 393px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 174px;
+            height: 30px;
+
+            border: none;
+            border-radius: 7px;
+
+            background: #ffffff;
+            color: #07172e;
+
+            font-size: 10px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+        }
+
+        .next-button:hover {
+            background: #e9edf4;
+            transform: translateX(-50%) translateY(-1px);
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="onboarding-screen">
+
+        <!-- Shield -->
+        <div class="shield"></div>
+
+
+        <!-- Heading -->
+        <h1 class="title">
+            Your Digital Identity, Secured
+        </h1>
+
+
+        <!-- Description -->
+        <p class="description">
+            Protect your digital identity with ZeroTrace
+        </p>
+
+
+        <!-- Page Indicators -->
+        <div class="dots">
+
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+
+        </div>
+
+
+        <!-- Next Button -->
+        <button class="next-button">
+            Next →
+        </button>
+
+    </div>
+
+</body>
+</html>

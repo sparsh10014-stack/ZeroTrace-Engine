@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroTrace - Security Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+
+
+        /* =========================
+           MAIN SCREEN
+        ========================= */
+
+        .home-screen {
+            width: 245px;
+            height: 528px;
+
+            position: relative;
+
+            background: linear-gradient(
+                180deg,
+                #061525 0%,
+                #0b2149 55%,
+                #173a7c 100%
+            );
+
+            color: white;
+            overflow: hidden;
+        }
+
+
+        /* =========================
+           TOP HEADER
+        ========================= */
+
+        .header {
+            height: 55px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 13px;
+        }
+
+        .brand {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+
+        /* Bell */
+
+        .bell {
+            width: 18px;
+            height: 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+        }
+
+        .bell svg {
+            width: 16px;
+            height: 16px;
+        }
+
+
+        /* =========================
+           DASHBOARD CONTENT
+        ========================= */
+
+        .dashboard-content {
+            position: absolute;
+
+            top: 84px;
+            left: 0;
+
+            width: 100%;
+
+            text-align: center;
+        }
+
+
+        /* =========================
+           TITLE
+        ========================= */
+
+        .dashboard-content h1 {
+            margin: 0;
+
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            margin: 19px 0 0;
+
+            font-size: 9px;
+
+            color: #dce3ef;
+        }
+
+
+        /* =========================
+           SECURITY STATUS CARD
+        ========================= */
+
+        .status-card {
+            width: 137px;
+            height: 56px;
+
+            margin: 33px auto 0;
+
+            border-radius: 9px;
+
+            background: #142f62;
+
+            display: flex;
+            flex-direction: column;
+
+            justify-content: center;
+            align-items: center;
+
+            animation: statusGlow 3s ease-in-out infinite;
+        }
+
+        .status-title {
+            font-size: 11px;
+
+            margin-bottom: 7px;
+        }
+
+        .protected {
+            font-size: 11px;
+            font-weight: 600;
+
+            color: #16e77b;
+        }
+
+        .protected-check {
+            display: inline-block;
+
+            width: 6px;
+            height: 10px;
+
+            margin-left: 4px;
+
+            border-right: 2px solid #16e77b;
+            border-bottom: 2px solid #16e77b;
+
+            transform: rotate(45deg);
+        }
+
+
+        /* =========================
+           SHIELD
+        ========================= */
+
+        .shield {
+            width: 74px;
+            height: 82px;
+
+            margin: 46px auto 0;
+
+            background: linear-gradient(
+                145deg,
+                #ffffff,
+                #c8cbd0
+            );
+
+            clip-path: polygon(
+                50% 0%,
+                67% 9%,
+                84% 4%,
+                100% 20%,
+                91% 43%,
+                100% 68%,
+                88% 82%,
+                68% 92%,
+                50% 100%,
+                32% 92%,
+                12% 82%,
+                0% 68%,
+                9% 43%,
+                0% 20%,
+                16% 4%,
+                33% 9%
+            );
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            animation: shieldGlow 3s ease-in-out infinite;
+        }
+
+
+        /* Lock */
+
+        .lock {
+            width: 14px;
+            height: 13px;
+
+            background: white;
+
+            border-radius: 2px;
+
+            position: relative;
+        }
+
+        .lock::before {
+            content: "";
+
+            position: absolute;
+
+            width: 8px;
+            height: 8px;
+
+            border: 2px solid white;
+            border-bottom: none;
+
+            border-radius: 7px 7px 0 0;
+
+            left: 1px;
+            top: -7px;
+        }
+
+
+        /* =========================
+           SECURITY SCORE
+        ========================= */
+
+        .score-title {
+            margin: 45px 0 0;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .score {
+            margin: 9px 0 0;
+
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+
+        /* =========================
+           BOTTOM NAVIGATION
+           SAME AS HOME CODE
+        ========================= */
+
+        .bottom-nav {
+            position: absolute;
+
+            left: 21px;
+            right: 11px;
+            bottom: 12px;
+
+            height: 40px;
+
+            background: #102b59;
+
+            border-radius: 12px;
+
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+
+        /* Navigation Items */
+
+        .nav-item {
+            width: 40px;
+            height: 34px;
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            color: #dce4f2;
+
+            font-size: 12px;
+
+            cursor: pointer;
+
+            position: relative;
+        }
+
+        .nav-item span {
+            font-size: 7px;
+            margin-top: 2px;
+        }
+
+
+        /* Active Security */
+
+        .nav-item.active {
+            color: white;
+        }
+
+        .nav-item.active::before {
+            content: "";
+
+            position: absolute;
+
+            top: -1px;
+
+            width: 8px;
+            height: 2px;
+
+            background: #9b5cff;
+
+            border-radius: 5px;
+        }
+
+
+        /* =========================
+           ANIMATIONS
+        ========================= */
+
+        @keyframes shieldGlow {
+
+            0%,
+            100% {
+                filter: drop-shadow(
+                    0 0 2px rgba(0, 220, 255, 0.05)
+                );
+            }
+
+            50% {
+                filter: drop-shadow(
+                    0 0 8px rgba(0, 220, 255, 0.20)
+                );
+            }
+        }
+
+
+        @keyframes statusGlow {
+
+            0%,
+            100% {
+                box-shadow:
+                    0 0 0 rgba(0, 170, 255, 0);
+            }
+
+            50% {
+                box-shadow:
+                    0 0 14px rgba(0, 170, 255, 0.12);
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <div class="home-screen">
+
+
+        <!-- =========================
+             HEADER
+        ========================= -->
+
+        <div class="header">
+
+            <div class="brand">
+                ZeroTrace
+            </div>
+
+
+            <!-- Bell Icon -->
+
+            <div class="bell">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+
+                    <path
+                        d="M18 9C18 5.69 15.76 3 12 3C8.24 3 6 5.69 6 9C6 14 4 15 4 17H20C20 15 18 14 18 9Z"
+                        stroke="white"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+
+                    <path
+                        d="M10 20H14"
+                        stroke="white"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                    />
+
+                </svg>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             DASHBOARD CONTENT
+        ========================= -->
+
+        <div class="dashboard-content">
+
+
+            <h1>
+                Security Dashboard
+            </h1>
+
+
+            <p class="subtitle">
+                Your digital security at a glance
+            </p>
+
+
+            <!-- Security Status -->
+
+            <div class="status-card">
+
+                <div class="status-title">
+                    Security Status
+                </div>
+
+                <div class="protected">
+                    Protected
+                    <span class="protected-check"></span>
+                </div>
+
+            </div>
+
+
+            <!-- Shield -->
+
+            <div class="shield">
+
+                <div class="lock"></div>
+
+            </div>
+
+
+            <!-- Score -->
+
+            <div class="score-title">
+                Security Score
+            </div>
+
+            <div class="score">
+                95/100
+            </div>
+
+
+        </div>
+
+
+        <!-- =========================
+             BOTTOM NAVIGATION
+        ========================= -->
+
+        <div class="bottom-nav">
+
+
+            <!-- Home -->
+
+            <div class="nav-item">
+
+                🏠
+
+               
+               
+               
+
+            </div>
+
+
+            <!-- Security ACTIVE -->
+
+            <div class="nav-item active">
+
+                🛡️
+
+                <span>
+                    Security
+                </span>
+
+            </div>
+
+
+            <!-- Verification -->
+
+            <div class="nav-item">
+
+                👁️
+
+            </div>
+
+
+            <!-- Settings -->
+
+            <div class="nav-item">
+
+                ⚙️
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</body>
+</html>

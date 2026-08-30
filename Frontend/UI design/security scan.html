@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroTrace - Security Scan</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+
+        /* =========================
+           MAIN SCREEN
+        ========================= */
+
+        .home-screen {
+            width: 245px;
+            height: 528px;
+
+            position: relative;
+
+            background: linear-gradient(
+                180deg,
+                #061525 0%,
+                #0b2149 55%,
+                #173a7c 100%
+            );
+
+            color: white;
+            overflow: hidden;
+        }
+
+
+        /* =========================
+           TOP HEADER
+        ========================= */
+
+        .header {
+            height: 55px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 13px;
+        }
+
+        .brand {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+
+        /* Bell */
+
+        .bell {
+            width: 18px;
+            height: 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+        }
+
+        .bell svg {
+            width: 16px;
+            height: 16px;
+        }
+
+
+        /* =========================
+           MAIN CONTENT
+        ========================= */
+
+        .content {
+            position: absolute;
+
+            top: 117px;
+            left: 0;
+
+            width: 100%;
+
+            text-align: center;
+        }
+
+
+        /* =========================
+           TITLE
+        ========================= */
+
+        .content h1 {
+            margin: 0;
+
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            margin: 14px 0 0;
+
+            font-size: 9px;
+            color: #aebbd0;
+        }
+
+
+        /* =========================
+           PROPER EYE
+        ========================= */
+
+        .eye {
+            position: relative;
+
+            width: 102px;
+            height: 58px;
+
+            margin: 48px auto 0;
+
+            background: #dce4f4;
+
+            /*
+                Eye shape:
+                Two curved halves meet
+                at the left and right points.
+            */
+
+            clip-path: polygon(
+                0% 50%,
+                8% 35%,
+                20% 20%,
+                35% 10%,
+                50% 6%,
+                65% 10%,
+                80% 20%,
+                92% 35%,
+                100% 50%,
+
+                92% 65%,
+                80% 80%,
+                65% 90%,
+                50% 94%,
+                35% 90%,
+                20% 80%,
+                8% 65%
+            );
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        /* Dark Iris */
+
+        .eye::before {
+            content: "";
+
+            position: absolute;
+
+            width: 38px;
+            height: 38px;
+
+            left: 32px;
+            top: 10px;
+
+            border-radius: 50%;
+
+            background: #102b59;
+        }
+
+
+        /* Pupil */
+
+        .eye::after {
+            content: "";
+
+            position: absolute;
+
+            width: 17px;
+            height: 17px;
+
+            left: 42px;
+            top: 20px;
+
+            border-radius: 50%;
+
+            background: #dce4f4;
+        }
+
+
+        /* =========================
+           TAP TO SCAN
+        ========================= */
+
+        .tap-text {
+            margin-top: 37px;
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+
+        /* =========================
+           SCAN BUTTON
+        ========================= */
+
+        .scan-button {
+            margin-top: 15px;
+
+            width: 88px;
+            height: 28px;
+
+            border: none;
+            border-radius: 6px;
+
+            background: #d9dce1;
+            color: #07172e;
+
+            font-size: 10px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+        }
+
+        .scan-button:hover {
+            background: white;
+
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 0 10px rgba(80, 180, 255, 0.25);
+        }
+
+
+        /* =========================
+           DESCRIPTION
+        ========================= */
+
+        .description {
+            margin: 17px auto 0;
+
+            width: 175px;
+
+            font-size: 11px;
+            line-height: 16px;
+
+            font-weight: 600;
+        }
+
+
+        /* =========================
+           BOTTOM NAVIGATION
+           SAME AS HOME
+        ========================= */
+
+        .bottom-nav {
+            position: absolute;
+
+            left: 21px;
+            right: 11px;
+            bottom: 12px;
+
+            height: 40px;
+
+            background: #102b59;
+
+            border-radius: 12px;
+
+            display: flex;
+
+            justify-content: space-around;
+            align-items: center;
+        }
+
+
+        /* Navigation Items */
+
+        .nav-item {
+            width: 40px;
+            height: 34px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            color: #dce4f2;
+
+            font-size: 12px;
+
+            cursor: pointer;
+
+            position: relative;
+        }
+
+        .nav-item span {
+            font-size: 7px;
+
+            margin-top: 2px;
+        }
+
+
+        /* Active Scan */
+
+        .nav-item.active {
+            color: white;
+        }
+
+        .nav-item.active::before {
+            content: "";
+
+            position: absolute;
+
+            top: -1px;
+
+            width: 8px;
+            height: 2px;
+
+            background: #9b5cff;
+
+            border-radius: 5px;
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <div class="home-screen">
+
+
+        <!-- =========================
+             HEADER
+        ========================== -->
+
+        <div class="header">
+
+            <div class="brand">
+                ZeroTrace
+            </div>
+
+
+            <!-- Bell -->
+
+            <div class="bell">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+
+                    <path
+                        d="M18 9C18 5.69 15.76 3 12 3C8.24 3 6 5.69 6 9C6 14 4 15 4 17H20C20 15 18 14 18 9Z"
+                        stroke="white"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+
+                    <path
+                        d="M10 20H14"
+                        stroke="white"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                    />
+
+                </svg>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             MAIN CONTENT
+        ========================= -->
+
+        <div class="content">
+
+
+            <h1>
+                Security Scan
+            </h1>
+
+
+            <p class="subtitle">
+                Check your device security
+            </p>
+
+
+            <!-- Proper Eye -->
+
+            <div class="eye"></div>
+
+
+            <!-- Tap To Scan -->
+
+            <div class="tap-text">
+                Tap to Scan
+            </div>
+
+
+            <!-- Scan Button -->
+
+            <button class="scan-button">
+                Scan now →
+            </button>
+
+
+            <!-- Description -->
+
+            <p class="description">
+                Your device will be checked for
+                <br>
+                security risks.
+            </p>
+
+        </div>
+
+
+        <!-- =========================
+             BOTTOM NAVIGATION
+        ========================= -->
+
+        <div class="bottom-nav">
+
+
+            <!-- HOME -->
+
+            <div class="nav-item">
+
+                🏠
+
+              
+              
+              
+
+            </div>
+
+
+            <!-- SECURITY -->
+
+            <div class="nav-item">
+
+                🛡️
+
+            
+               
+            
+
+            </div>
+
+
+            <!-- SCAN ACTIVE -->
+
+            <div class="nav-item active">
+
+                👁️
+
+                <span>
+                    Scan
+                </span>
+
+            </div>
+
+
+            <!-- SETTINGS -->
+
+            <div class="nav-item">
+
+                ⚙️
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</body>
+</html>

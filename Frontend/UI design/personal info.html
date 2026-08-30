@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroTrace - Personal Information</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+
+        /* =========================
+           MAIN SCREEN
+        ========================= */
+
+        .personal-screen {
+            width: 243px;
+            height: 526px;
+
+            position: relative;
+
+            background: linear-gradient(
+                180deg,
+                #061525 0%,
+                #0b2149 55%,
+                #173a7c 100%
+            );
+
+            color: white;
+            overflow: hidden;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+            height: 55px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 13px;
+        }
+
+        .brand {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* =========================
+           BELL ICON - CSS ONLY
+        ========================= */
+
+        .bell {
+            width: 18px;
+            height: 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            position: relative;
+        }
+
+        .bell-icon {
+            width: 10px;
+            height: 11px;
+
+            border: 1.5px solid white;
+
+            border-radius: 6px 6px 2px 2px;
+
+            position: relative;
+        }
+
+        /* Bell bottom */
+
+        .bell-icon::before {
+            content: "";
+
+            position: absolute;
+
+            width: 13px;
+            height: 1.5px;
+
+            background: white;
+
+            left: -3px;
+            bottom: -2px;
+
+            border-radius: 2px;
+        }
+
+        /* Bell clapper */
+
+        .bell-icon::after {
+            content: "";
+
+            position: absolute;
+
+            width: 3px;
+            height: 3px;
+
+            background: white;
+
+            border-radius: 50%;
+
+            left: 2px;
+            bottom: -5px;
+        }
+
+        /* =========================
+           CONTENT
+        ========================= */
+
+        .content {
+            position: absolute;
+
+            top: 75px;
+            left: 0;
+
+            width: 100%;
+
+            text-align: center;
+        }
+
+        .content h1 {
+            margin: 0;
+
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            margin: 20px 0 0;
+
+            font-size: 9px;
+            color: #8994a9;
+        }
+
+        /* =========================
+           INFORMATION OPTIONS
+        ========================= */
+
+        .info-list {
+            margin-top: 40px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .info-btn {
+            width: 224px;
+            height: 40px;
+
+            margin-bottom: 26px;
+
+            border: none;
+            border-radius: 9px;
+
+            background: white;
+            color: #687993;
+
+            display: flex;
+            align-items: center;
+
+            padding-left: 40px;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .info-btn .icon {
+            width: 28px;
+
+            margin-right: 10px;
+
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .info-btn:hover {
+            background: #f1f3f6;
+        }
+
+        /* =========================
+           EDIT TEXT
+        ========================= */
+
+        .edit-text {
+            margin-top: 4px;
+
+            font-size: 9px;
+            font-weight: 600;
+
+            color: #8994a9;
+        }
+
+        /* =========================
+           BOTTOM NAVIGATION
+        ========================= */
+
+        .bottom-nav {
+            position: absolute;
+
+            left: 20px;
+            right: 10px;
+            bottom: 12px;
+
+            height: 40px;
+
+            background: #102b59;
+
+            border-radius: 12px;
+
+            display: flex;
+
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 40px;
+            height: 34px;
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            color: #dce4f2;
+
+            font-size: 11px;
+
+            cursor: pointer;
+
+            position: relative;
+        }
+
+        .nav-item span {
+            font-size: 6px;
+
+            margin-top: 2px;
+
+            line-height: 7px;
+        }
+
+        /* Active Settings */
+
+        .nav-item.active {
+            color: white;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="personal-screen">
+
+        <!-- =========================
+             HEADER
+        ========================= -->
+
+        <div class="header">
+
+            <div class="brand">
+                ZeroTrace
+            </div>
+
+            <!-- CSS Bell Icon -->
+
+            <div class="bell">
+                <div class="bell-icon"></div>
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             MAIN CONTENT
+        ========================= -->
+
+        <div class="content">
+
+            <h1>
+                Personal Information
+            </h1>
+
+            <p class="subtitle">
+                Manage your personal information
+            </p>
+
+
+            <!-- =========================
+                 INFORMATION OPTIONS
+            ========================= -->
+
+            <div class="info-list">
+
+                <!-- Full Name -->
+
+                <button class="info-btn">
+                    <span class="icon">👤</span>
+                    <span>Full Name &nbsp;&gt;</span>
+                </button>
+
+
+                <!-- Email -->
+
+                <button class="info-btn">
+                    <span class="icon">✉</span>
+                    <span>Email Address</span>
+                </button>
+
+
+                <!-- Phone -->
+
+                <button class="info-btn">
+                    <span class="icon">🔑</span>
+                    <span>Phone Number</span>
+                </button>
+
+
+                <!-- Address -->
+
+                <button class="info-btn">
+                    <span class="icon">⌂</span>
+                    <span>Address</span>
+                </button>
+
+            </div>
+
+
+            <!-- EDIT TEXT -->
+
+            <p class="edit-text">
+                Edit your personal information
+            </p>
+
+        </div>
+
+
+        <!-- =========================
+             BOTTOM NAVIGATION
+        ========================= -->
+
+        <div class="bottom-nav">
+
+            <!-- Home -->
+
+            <div class="nav-item">
+                🏠
+            </div>
+
+
+            <!-- Security -->
+
+            <div class="nav-item">
+                🛡️
+            </div>
+
+
+            <!-- Verification -->
+
+            <div class="nav-item">
+                👁️
+            </div>
+
+
+            <!-- Settings -->
+
+            <div class="nav-item active">
+                ⚙️
+                <span>Settings</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
