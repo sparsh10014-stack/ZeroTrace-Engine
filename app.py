@@ -95,7 +95,7 @@ def issue_credential():
 # =========================================================
 # VERIFY ROUTE
 # =========================================================
-@app.route('/verify', methods=['POST'])
+@app.route('/api/verify-proof', methods=['POST'])
 def verify_proof():
     # Frontend se JSON request body receive kar rahe hain.
     payload = request.get_json()
@@ -123,9 +123,10 @@ def verify_proof():
     if proof is None or public_signals is None:
         return jsonify({"status": "error", "message": "Missing proof or public signals"}), 400
 
-    os.makedirs("temp", exist_ok=True)
-    proof_path = os.path.join("temp", "proof.json")
-    public_path = os.path.join("temp", "public.json")
+    # os.makedirs("temp", exist_ok=True)
+
+    # proof_path = os.path.join("temp", "proof.json")
+    # public_path = os.path.join("temp", "public.json")
 
 
 
