@@ -25,16 +25,23 @@ def get_citizen_record(id_hash):
         conn = sqlite3.connect('database/verification_log.db')
         cursor = conn.cursor()
 
-        # Citizen record ko fetch karne ke liye SQL query execute kar rahe hain.
-        cursor.execute("SELECT dob_year ,expiry , is_active FROM citizens WHERE id_hash = ?", (id_hash,))
+        # Sachin's database me OCR-extracted ID search kar rahe hain.
+        cursor.execute(
+            "SELECT dob_year, expiry, is_active "
+            "FROM citizens WHERE id_hash = ?",
+            (id_hash,)
+        )
+
         record = cursor.fetchone()
+
+        # Database connection close kar rahe hain.
+        conn.close()
 
         return record
 
-    except sqlite3.OperationalError :
-        
-        return (2005,1772150400,1)
-
+    except sqlite3.OperationalError:
+        # Database error hone par fake citizen return nahi karna.
+        return None
     
 @app.route('/')
 def index():
