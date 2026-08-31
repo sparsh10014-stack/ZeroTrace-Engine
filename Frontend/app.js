@@ -338,7 +338,6 @@ async function verifyDigiLockerCredential(credential) {
         if (
             Number(data.expiry) < currentUnixTime
         ) {
-
             // throw new Error(
             //     "CREDENTIAL EXPIRED: Issued credential has expired."
             // );
@@ -445,7 +444,6 @@ async function verifyDigiLockerCredential(credential) {
 
 
         // if (!isValid) {
-
         //     throw new Error(
         //         "FORGERY DETECTED: Invalid issuer signature."
         //     );
@@ -517,6 +515,7 @@ async function handleVerification(event) {
 
     submitBtn.disabled = true;
     submitBtn.classList.add("opacity-50");
+    submitBtn.classList.add("loading");
 
 
     // Reset dashboard
@@ -1093,6 +1092,8 @@ async function handleVerification(event) {
         submitBtn.classList.remove(
             "opacity-50"
         );
+
+        submitBtn.classList.remove("loading");
 
         hideStatus();
     }

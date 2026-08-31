@@ -42,6 +42,44 @@
     }
     </script>
 
+    <style>
+        .animated-logo {
+            width: 55px;
+            height: 55px;
+            animation: pulseLogo 3s infinite ease-in-out;
+        }
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        #submit-btn {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #submit-btn.loading .btn-text {
+            visibility: hidden;
+        }
+        #submit-btn.loading .spinner {
+            display: block;
+        }
+        .spinner {
+            display: none;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
 </head>
 
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
@@ -105,12 +143,16 @@
             class="bg-slate-800 border border-slate-700
                    rounded-2xl p-6 shadow-xl">
 
-            <!-- Heading -->
-            <h2 class="text-xl font-bold mb-2 text-white">
-
-                Age Verification Portal
-
-            </h2>
+            <!-- Top Header with Logo -->
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <!-- Heading -->
+                    <h2 class="text-xl font-bold text-white">
+                        Age Verification Portal
+                    </h2>
+                </div>
+                <img src="logo.jpeg" alt="Logo" class="animated-logo">
+            </div>
 
             <!-- Description -->
             <p class="text-slate-400 text-sm mb-6">
@@ -191,7 +233,8 @@
                        py-3 rounded-lg
                        transition">
 
-                Generate & Verify ZKP
+                <span class="btn-text">Generate & Verify ZKP</span>
+                <div class="spinner"></div>
 
             </button>
 
