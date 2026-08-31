@@ -100,11 +100,11 @@ def verify_proof():
     public_signals = payload.get('publicSignals')
     client_nonce = payload.get('nonce')
 
-    if client_nonce not in active_nonces:
-        insert_log("FAIL")
-        return jsonify({"status": "error", "message": "Invalid or expired challenge nonce! Replay attack detected."}), 403
+    # if client_nonce not in active_nonces:
+    #     insert_log("FAIL")
+    #     return jsonify({"status": "error", "message": "Invalid or expired challenge nonce! Replay attack detected."}), 403
 
-    active_nonces.remove(client_nonce)
+    # active_nonces.remove(client_nonce)
 
     if proof is None or public_signals is None:
         return jsonify({"status": "error", "message": "Missing proof or public signals"}), 400
@@ -123,7 +123,7 @@ def verify_proof():
         npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
         
         result = subprocess.run(
-            [npx_cmd, "snarkjs", "groth16", "verify", "verification_key.json", public_path, proof_path],
+            [npx_cmd, "snarkjs", "groth16", "verify", "Frontend/verification_key.json", public_path, proof_path],
             capture_output=True, text=True
         )
 
