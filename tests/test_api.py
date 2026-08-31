@@ -63,12 +63,10 @@ def test_valid_citizen_reaches_issuer(client):
     response = client.post(
         "/api/issue-credential",
         json={
-            "ocr_id_hash": "CITIZEN011"
+            "ocr_id_hash": "234868130985"
         }
     )
 
-    # The citizen exists and is active.
-    # The request should therefore reach the issuer/signing stage.
     assert response.status_code in [200, 500]
 
     data = response.get_json()
@@ -84,18 +82,16 @@ def test_revoked_citizen_returns_403(client):
     response = client.post(
         "/api/issue-credential",
         json={
-            "ocr_id_hash": "CITIZEN002"
+            "ocr_id_hash": "641158019058"
         }
     )
 
-    assert response.status_code in [200, 403]
+    assert response.status_code == 403
 
-    if response.status_code == 403:
-        data = response.get_json()
+    data = response.get_json()
 
-        assert data["success"] is False
-        assert "revoked" in data["message"].lower()
-
+    assert data["success"] is False
+    assert "revoked" in data["message"].lower()
 
 # =========================================================
 # FRONTEND COMPATIBILITY
