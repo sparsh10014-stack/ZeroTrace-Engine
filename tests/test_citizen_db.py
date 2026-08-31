@@ -69,6 +69,7 @@ def test_revoke_already_revoked_citizen(tmp_path, monkeypatch):
 
     assert citizen["active"] is False
 
+
 def test_valid_citizen_response_has_exact_fields(tmp_path, monkeypatch):
     db_path = create_test_database(tmp_path)
 

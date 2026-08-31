@@ -79,10 +79,17 @@ def test_valid_citizen_reaches_issuer(client):
 # =========================================================
 
 def test_revoked_citizen_returns_403(client):
+    from database.citizen_db import revoke_citizen
+
+    citizen_id = "641158019058"
+
+    # Revoke the citizen for this test
+    revoke_citizen(citizen_id)
+
     response = client.post(
         "/api/issue-credential",
         json={
-            "ocr_id_hash": "641158019058"
+            "ocr_id_hash": citizen_id
         }
     )
 
