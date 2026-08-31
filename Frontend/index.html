@@ -13,14 +13,12 @@
     ====================================================== -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-
     <!-- =====================================================
-         SnarkJS
+         SnarkJS (UPDATED TO LOCAL FILE)
          Used in the browser to generate and verify
          the Groth16 Zero-Knowledge Proof.
     ====================================================== -->
-    <script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.0/build/snarkjs.min.js"></script>
-
+    <script src="snarkjs.min.js"></script>
 
     <!-- =====================================================
          Tesseract.js
@@ -31,18 +29,22 @@
     ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-
     <!-- =====================================================
-         CircomlibJS
+         CircomlibJS (UPDATED TO LOCAL FILE)
          Used for EdDSA / Poseidon cryptographic operations.
     ====================================================== -->
-    <script src="https://cdn.jsdelivr.net/npm/circomlibjs@0.1.7/build/circomlibjs.min.js"></script>
+    <script src="circomlibjs.min.js"></script>
+
+    <script>
+    // Make CircomlibJS available globally for app.js
+    if (typeof circomlibjs === "undefined") {
+        console.error("CircomlibJS failed to load.");
+    }
+    </script>
 
 </head>
 
-
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
-
 
 <!-- =========================================================
      NAVIGATION BAR
@@ -57,7 +59,6 @@
         🛡️ ZeroTrace Engine
     </div>
 
-
     <!-- Navigation buttons -->
     <div class="space-x-3">
 
@@ -71,7 +72,6 @@
             User Portal
 
         </button>
-
 
         <!-- Verifier Dashboard -->
         <button
@@ -89,13 +89,11 @@
 </nav>
 
 
-
 <!-- =========================================================
      MAIN CONTENT
 ========================================================= -->
 
 <main class="max-w-2xl mx-auto mt-10 p-6">
-
 
     <!-- =====================================================
          USER PORTAL
@@ -107,14 +105,12 @@
             class="bg-slate-800 border border-slate-700
                    rounded-2xl p-6 shadow-xl">
 
-
             <!-- Heading -->
             <h2 class="text-xl font-bold mb-2 text-white">
 
                 Age Verification Portal
 
             </h2>
-
 
             <!-- Description -->
             <p class="text-slate-400 text-sm mb-6">
@@ -124,7 +120,6 @@
                 your raw document is discarded after extraction.
 
             </p>
-
 
 
             <!-- =================================================
@@ -142,7 +137,6 @@
                     📄 Upload Government ID
 
                 </label>
-
 
                 <!--
                     User selects the ID document.
@@ -172,7 +166,6 @@
                            cursor-pointer"
                 />
 
-
                 <!-- Privacy guarantee -->
                 <p class="text-xs text-slate-500 mt-2">
 
@@ -182,7 +175,6 @@
                 </p>
 
             </div>
-
 
 
             <!-- =================================================
@@ -204,7 +196,6 @@
             </button>
 
 
-
             <!-- =================================================
                  PROCESSING STATUS
             ================================================== -->
@@ -216,9 +207,7 @@
                        border border-blue-500/30
                        rounded-xl">
 
-
                 <div class="flex items-center gap-3">
-
 
                     <!-- Loading animation -->
                     <div
@@ -228,7 +217,6 @@
                                border-b-2
                                border-blue-400">
                     </div>
-
 
                     <!-- Dynamic status message -->
                     <span
@@ -242,7 +230,6 @@
                 </div>
 
             </div>
-
 
 
             <!-- =================================================
@@ -269,7 +256,6 @@
     </section>
 
 
-
     <!-- =====================================================
          VERIFIER DASHBOARD
 
@@ -288,14 +274,12 @@
         id="screen-verifier"
         class="hidden">
 
-
         <div
             class="bg-slate-800
                    border border-slate-700
                    rounded-2xl
                    p-6
                    shadow-xl">
-
 
             <!-- Dashboard heading -->
 
@@ -305,7 +289,6 @@
 
             </h2>
 
-
             <p class="text-slate-400 text-sm mb-6">
 
                 Live ZeroTrace verification pipeline.
@@ -313,13 +296,11 @@
             </p>
 
 
-
             <!-- =================================================
                  PIPELINE STAGES
             ================================================== -->
 
             <div class="space-y-3">
-
 
                 <!-- =================================================
                      STAGE 1 — OCR
@@ -335,7 +316,6 @@
                     🔍 OCR — Waiting
 
                 </div>
-
 
 
                 <!-- =================================================
@@ -354,7 +334,6 @@
                 </div>
 
 
-
                 <!-- =================================================
                      STAGE 3 — ZKP GENERATION
                 ================================================== -->
@@ -369,7 +348,6 @@
                     🔐 Proof — Waiting
 
                 </div>
-
 
 
                 <!-- =================================================
@@ -396,7 +374,6 @@
 </main>
 
 
-
 <!-- =========================================================
      FRONTEND JAVASCRIPT
 
@@ -412,7 +389,6 @@
 ========================================================= -->
 
 <script src="app.js"></script>
-
 
 </body>
 </html>
