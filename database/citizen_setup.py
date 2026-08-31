@@ -28,8 +28,9 @@ def seed_database():
     # Replace the placeholder strings with the actual 12-digit Aadhaar numbers.
     citizens = [
         ("234868130985", "Sparsh Pathak", "2005-09-12", 1),
-        ("641158019058", "Prakhar Srivastav", "2005-05-28", 1),    # Update with Sachin's real DOB
-        # ("RITIK_12_DIGIT_AADHAAR", "Ritik", "2005-08-14", 1),      # Update with Ritik's real DOB
+        ("641158019058", "Prakhar Srivastav", "2005-05-28", 1),
+        ("254334990614", "Sachin Chaudhary", "2004-12-10", 1),
+        ("353649690474", "Ritik Jaiswal", "2004-05-23", 1),     
         # ("SNEHLATA_12_DIGIT_AADHAAR", "Snehlata", "2005-11-03", 1) # Update with Snehlata's real DOB
     ]
 
