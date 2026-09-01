@@ -42,21 +42,107 @@
     }
     </script>
 
+    <style>
+        .nav-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            animation: funkyPulse 2s ease-in-out infinite;
+        }
+
+        .animated-logo {
+            width: 55px;
+            height: 55px;
+            animation: funkyPulse 2s ease-in-out infinite;
+        }
+
+        /* Electric Neon Funky Verify Button */
+        #submit-btn {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ff007f 0%, #7928ca 50%, #00f0ff 100%);
+            animation: electricGlow 1.5s ease-in-out infinite;
+            transition: transform 0.2s ease;
+        }
+
+        #submit-btn:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 
+                0 0 15px rgba(0, 240, 255, 0.9),
+                0 0 30px rgba(255, 0, 127, 0.8),
+                0 0 45px rgba(121, 40, 202, 0.6);
+        }
+
+        #submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        #submit-btn.loading .btn-text {
+            visibility: hidden;
+        }
+
+        #submit-btn.loading .spinner {
+            display: block;
+        }
+
+        .spinner {
+            display: none;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes electricGlow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(255, 0, 127, 0.4), 0 0 12px rgba(0, 240, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 12px rgba(255, 0, 127, 0.9), 0 0 25px rgba(0, 240, 255, 0.8), 0 0 40px rgba(121, 40, 202, 0.5);
+            }
+        }
+
+        @keyframes funkyPulse {
+            0%, 100% {
+                filter: drop-shadow(0 0 4px rgba(0, 240, 255, 0.5));
+                transform: scale(1);
+            }
+            50% {
+                filter: drop-shadow(0 0 12px rgba(255, 0, 127, 0.8));
+                transform: scale(1.08) rotate(2deg);
+            }
+        }
+    </style>
+
 </head>
 
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-[#090014] via-[#1a0033] to-[#001a33] text-slate-100 min-h-screen font-sans">
 
 <!-- =========================================================
      NAVIGATION BAR
 ========================================================= -->
 
 <nav
-    class="border-b border-slate-800 bg-slate-950
-           px-6 py-4 flex justify-between items-center">
+    class="border-b border-purple-800/50 bg-[#090014]/90 backdrop-blur-md
+            px-6 py-4 flex justify-between items-center shadow-lg shadow-purple-950/40">
 
-    <!-- Project name -->
-    <div class="text-xl font-bold text-blue-400">
-        🛡️ ZeroTrace Engine
+    <!-- Project name with Logo -->
+    <div class="flex items-center space-x-3">
+        <img src="logo.jpeg" alt="Logo" class="nav-logo">
+        <div class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500 tracking-wider">
+            ZeroTrace Engine
+        </div>
     </div>
 
     <!-- Navigation buttons -->
@@ -66,8 +152,8 @@
         <button
             onclick="switchTab('user')"
             id="btn-user"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-500
-                   rounded-lg text-sm font-semibold transition">
+            class="px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500
+                   rounded-lg text-sm font-semibold transition shadow-md shadow-pink-900/30">
 
             User Portal
 
@@ -77,7 +163,7 @@
         <button
             onclick="switchTab('verifier')"
             id="btn-verifier"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700
+            class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 border border-purple-500/30
                    rounded-lg text-sm font-semibold transition">
 
             Verifier Dashboard
@@ -102,18 +188,24 @@
     <section id="screen-user">
 
         <div
-            class="bg-slate-800 border border-slate-700
-                   rounded-2xl p-6 shadow-xl">
+            class="bg-[#120229]/80 backdrop-blur-xl border border-cyan-500/30
+                   rounded-2xl p-6 shadow-2xl shadow-cyan-950/40">
 
-            <!-- Heading -->
-            <h2 class="text-xl font-bold mb-2 text-white">
+            <!-- Top Header with Logo -->
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <!-- Heading -->
+                    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-pink-400">
 
-                Age Verification Portal
+                        Age Verification Portal
 
-            </h2>
+                    </h2>
+                </div>
+                <img src="logo.jpeg" alt="Logo" class="animated-logo">
+            </div>
 
             <!-- Description -->
-            <p class="text-slate-400 text-sm mb-6">
+            <p class="text-purple-200/70 text-sm mb-6">
 
                 Upload your government ID.
                 OCR runs locally in your browser and
@@ -127,12 +219,12 @@
             ================================================== -->
 
             <div
-                class="bg-slate-900 border border-slate-700
+                class="bg-[#0b001a]/70 border border-purple-500/20
                        rounded-xl p-4">
 
                 <label
                     for="id-document"
-                    class="block text-sm font-medium mb-2">
+                    class="block text-sm font-medium mb-2 text-cyan-300">
 
                     📄 Upload Government ID
 
@@ -149,7 +241,7 @@
                     type="file"
                     id="id-document"
                     accept="image/png,image/jpeg,image/jpg"
-                    class="w-full text-sm text-slate-400
+                    class="w-full text-sm text-slate-300
 
                            file:mr-4
                            file:py-2
@@ -158,16 +250,16 @@
                            file:rounded-lg
                            file:border-0
 
-                           file:bg-blue-600
+                           file:bg-gradient-to-r file:from-pink-600 file:to-purple-600
                            file:text-white
 
-                           hover:file:bg-blue-500
+                           hover:file:opacity-90
 
                            cursor-pointer"
                 />
 
                 <!-- Privacy guarantee -->
-                <p class="text-xs text-slate-500 mt-2">
+                <p class="text-xs text-purple-300/60 mt-2">
 
                     🔒 Image is processed locally
                     and discarded immediately after OCR.
@@ -185,13 +277,11 @@
                 id="submit-btn"
                 type="button"
                 onclick="handleVerification(event)"
-                class="w-full mt-5 bg-blue-600
-                       hover:bg-blue-500
-                       text-white font-semibold
-                       py-3 rounded-lg
-                       transition">
+                class="w-full mt-5 text-white font-bold tracking-wide
+                       py-3 rounded-xl transition shadow-lg">
 
-                Generate & Verify ZKP
+                <span class="btn-text">Generate & Verify ZKP</span>
+                <div class="spinner"></div>
 
             </button>
 
@@ -203,8 +293,8 @@
             <div
                 id="loading-spinner"
                 class="hidden mt-6 p-4
-                       bg-slate-900
-                       border border-blue-500/30
+                       bg-[#0b001a]/70
+                       border border-cyan-500/30
                        rounded-xl">
 
                 <div class="flex items-center gap-3">
@@ -215,13 +305,13 @@
                                rounded-full
                                h-5 w-5
                                border-b-2
-                               border-blue-400">
+                               border-cyan-400">
                     </div>
 
                     <!-- Dynamic status message -->
                     <span
                         id="spinner-text"
-                        class="text-sm text-blue-300">
+                        class="text-sm text-cyan-300 font-medium">
 
                         Processing...
 
@@ -234,14 +324,6 @@
 
             <!-- =================================================
                  RESULT MESSAGE
-
-                 JavaScript will dynamically display:
-
-                 ✅ Credential issued
-                 ❌ ID not found
-                 ❌ ID revoked
-                 ❌ OCR/database mismatch
-                 ❌ Verification failed
             ================================================== -->
 
             <div
@@ -258,16 +340,6 @@
 
     <!-- =====================================================
          VERIFIER DASHBOARD
-
-         Judges can see the complete pipeline:
-
-         OCR
-          ↓
-         Issuer
-          ↓
-         Proof
-          ↓
-         Verify
     ====================================================== -->
 
     <section
@@ -275,21 +347,21 @@
         class="hidden">
 
         <div
-            class="bg-slate-800
-                   border border-slate-700
+            class="bg-[#120229]/80 backdrop-blur-xl
+                   border border-cyan-500/30
                    rounded-2xl
                    p-6
-                   shadow-xl">
+                   shadow-2xl shadow-cyan-950/40">
 
             <!-- Dashboard heading -->
 
-            <h2 class="text-xl font-bold mb-2 text-white">
+            <h2 class="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-pink-400">
 
                 Verifier Real-Time Monitor
 
             </h2>
 
-            <p class="text-slate-400 text-sm mb-6">
+            <p class="text-purple-200/70 text-sm mb-6">
 
                 Live ZeroTrace verification pipeline.
 
@@ -309,8 +381,8 @@
                 <div
                     id="stage-ocr"
                     class="stage p-4 rounded-lg
-                           bg-slate-900
-                           border border-slate-700
+                           bg-[#0b001a]/70
+                           border border-purple-500/20
                            transition">
 
                     🔍 OCR — Waiting
@@ -325,8 +397,8 @@
                 <div
                     id="stage-issuer"
                     class="stage p-4 rounded-lg
-                           bg-slate-900
-                           border border-slate-700
+                           bg-[#0b001a]/70
+                           border border-purple-500/20
                            transition">
 
                     🪪 Issuer — Waiting
@@ -341,8 +413,8 @@
                 <div
                     id="stage-proof"
                     class="stage p-4 rounded-lg
-                           bg-slate-900
-                           border border-slate-700
+                           bg-[#0b001a]/70
+                           border border-purple-500/20
                            transition">
 
                     🔐 Proof — Waiting
@@ -357,8 +429,8 @@
                 <div
                     id="stage-verify"
                     class="stage p-4 rounded-lg
-                           bg-slate-900
-                           border border-slate-700
+                           bg-[#0b001a]/70
+                           border border-purple-500/20
                            transition">
 
                     ✅ Verify — Waiting
@@ -376,16 +448,6 @@
 
 <!-- =========================================================
      FRONTEND JAVASCRIPT
-
-     app.js contains:
-
-     1. OCR
-     2. OCR → ID extraction
-     3. Credential request
-     4. Credential validation
-     5. ZKP generation
-     6. Proof submission
-     7. Dashboard updates
 ========================================================= -->
 
 <script src="app.js"></script>
