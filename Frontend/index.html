@@ -7,36 +7,19 @@
 
     <title>ZeroTrace | Age Verification</title>
 
-    <!-- =====================================================
-         Tailwind CSS
-         Used for styling the ZeroTrace UI.
-    ====================================================== -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- =====================================================
-         SnarkJS (UPDATED TO LOCAL FILE)
-         Used in the browser to generate and verify
-         the Groth16 Zero-Knowledge Proof.
-    ====================================================== -->
+    <!-- SnarkJS -->
     <script src="snarkjs.min.js"></script>
 
-    <!-- =====================================================
-         Tesseract.js
-         Performs OCR locally inside the user's browser.
-
-         IMPORTANT:
-         The uploaded image is NOT sent to the Flask server.
-    ====================================================== -->
+    <!-- Tesseract.js -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-    <!-- =====================================================
-         CircomlibJS (UPDATED TO LOCAL FILE)
-         Used for EdDSA / Poseidon cryptographic operations.
-    ====================================================== -->
+    <!-- CircomlibJS -->
     <script src="circomlibjs.min.js"></script>
 
     <script>
-    // Make CircomlibJS available globally for app.js
     if (typeof circomlibjs === "undefined") {
         console.error("CircomlibJS failed to load.");
     }
@@ -57,7 +40,36 @@
             animation: funkyPulse 2s ease-in-out infinite;
         }
 
-        /* Electric Neon Funky Verify Button */
+        /* Subtle Luxury Watermark Background for Inner Box */
+        .inner-watermark-box {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .inner-watermark-box::before {
+            content: "🔒 🛡️ 🔑 👤 🔐 ⚡ 🌐 🛡️ 🔑 🔒 👤 🔐";
+            position: absolute;
+            top: -20px;
+            left: -30px;
+            right: -30px;
+            bottom: -20px;
+            font-size: 2.5rem;
+            line-height: 1.8;
+            letter-spacing: 2.5rem;
+            color: rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+            z-index: 0;
+            transform: rotate(-6deg);
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .inner-watermark-box > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Electric Neon Funky Verify Button (Original Transition & Glow) */
         #submit-btn {
             position: relative;
             display: flex;
@@ -124,331 +136,96 @@
             }
         }
     </style>
-
 </head>
 
 <body class="bg-gradient-to-br from-[#090014] via-[#1a0033] to-[#001a33] text-slate-100 min-h-screen font-sans">
 
-<!-- =========================================================
-     NAVIGATION BAR
-========================================================= -->
-
-<nav
-    class="border-b border-purple-800/50 bg-[#090014]/90 backdrop-blur-md
-            px-6 py-4 flex justify-between items-center shadow-lg shadow-purple-950/40">
-
-    <!-- Project name with Logo -->
+<!-- NAVIGATION BAR -->
+<nav class="border-b border-purple-800/50 bg-[#090014]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center shadow-lg shadow-purple-950/40">
     <div class="flex items-center space-x-3">
         <img src="logo.jpeg" alt="Logo" class="nav-logo">
         <div class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500 tracking-wider">
             ZeroTrace Engine
         </div>
     </div>
-
-    <!-- Navigation buttons -->
     <div class="space-x-3">
-
-        <!-- User Portal -->
-        <button
-            onclick="switchTab('user')"
-            id="btn-user"
-            class="px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500
-                   rounded-lg text-sm font-semibold transition shadow-md shadow-pink-900/30">
-
+        <button onclick="switchTab('user')" id="btn-user" class="px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-lg text-sm font-semibold transition shadow-md shadow-pink-900/30">
             User Portal
-
         </button>
-
-        <!-- Verifier Dashboard -->
-        <button
-            onclick="switchTab('verifier')"
-            id="btn-verifier"
-            class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 border border-purple-500/30
-                   rounded-lg text-sm font-semibold transition">
-
+        <button onclick="switchTab('verifier')" id="btn-verifier" class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 border border-purple-500/30 rounded-lg text-sm font-semibold transition">
             Verifier Dashboard
-
         </button>
-
     </div>
-
 </nav>
 
-
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
-
+<!-- MAIN CONTENT -->
 <main class="max-w-2xl mx-auto mt-10 p-6">
 
-    <!-- =====================================================
-         USER PORTAL
-    ====================================================== -->
-
+    <!-- USER PORTAL -->
     <section id="screen-user">
-
-        <div
-            class="bg-[#120229]/80 backdrop-blur-xl border border-cyan-500/30
-                   rounded-2xl p-6 shadow-2xl shadow-cyan-950/40">
-
-            <!-- Top Header with Logo -->
+        <!-- OUTER BOX WITH SUBTLE DARK THEME -->
+        <div class="bg-[#120229]/80 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-6 shadow-2xl shadow-cyan-950/40">
+            
             <div class="flex justify-between items-center mb-2">
                 <div>
-                    <!-- Heading -->
                     <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-pink-400">
-
                         Age Verification Portal
-
                     </h2>
                 </div>
                 <img src="logo.jpeg" alt="Logo" class="animated-logo">
             </div>
 
-            <!-- Description -->
             <p class="text-purple-200/70 text-sm mb-6">
-
-                Upload your government ID.
-                OCR runs locally in your browser and
-                your raw document is discarded after extraction.
-
+                Upload your government ID. OCR runs locally in your browser and your raw document is discarded after extraction.
             </p>
 
-
-            <!-- =================================================
-                 DOCUMENT UPLOAD
-            ================================================== -->
-
-            <div
-                class="bg-[#0b001a]/70 border border-purple-500/20
-                       rounded-xl p-4">
-
-                <label
-                    for="id-document"
-                    class="block text-sm font-medium mb-2 text-cyan-300">
-
+            <!-- INNER BOX WITH WATERMARKS -->
+            <div class="inner-watermark-box bg-[#0b001a]/70 border border-purple-500/20 rounded-xl p-4">
+                <label for="id-document" class="block text-sm font-medium mb-2 text-cyan-300">
                     📄 Upload Government ID
-
                 </label>
-
-                <!--
-                    User selects the ID document.
-
-                    Only image files are accepted.
-                    The image stays inside the browser.
-                -->
-
-                <input
-                    type="file"
-                    id="id-document"
-                    accept="image/png,image/jpeg,image/jpg"
-                    class="w-full text-sm text-slate-300
-
-                           file:mr-4
-                           file:py-2
-                           file:px-4
-
-                           file:rounded-lg
-                           file:border-0
-
-                           file:bg-gradient-to-r file:from-pink-600 file:to-purple-600
-                           file:text-white
-
-                           hover:file:opacity-90
-
-                           cursor-pointer"
-                />
-
-                <!-- Privacy guarantee -->
+                <input type="file" id="id-document" accept="image/png,image/jpeg,image/jpg" class="w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-pink-600 file:to-purple-600 file:text-white hover:file:opacity-90 cursor-pointer"/>
                 <p class="text-xs text-purple-300/60 mt-2">
-
-                    🔒 Image is processed locally
-                    and discarded immediately after OCR.
-
+                    🔒 Image is processed locally and discarded immediately after OCR.
                 </p>
-
             </div>
 
-
-            <!-- =================================================
-                 START VERIFICATION BUTTON
-            ================================================== -->
-
-            <button
-                id="submit-btn"
-                type="button"
-                onclick="handleVerification(event)"
-                class="w-full mt-5 text-white font-bold tracking-wide
-                       py-3 rounded-xl transition shadow-lg">
-
+            <button id="submit-btn" type="button" onclick="handleVerification(event)" class="w-full mt-5 text-white font-bold tracking-wide py-3 rounded-xl transition shadow-lg">
                 <span class="btn-text">Generate & Verify ZKP</span>
                 <div class="spinner"></div>
-
             </button>
 
-
-            <!-- =================================================
-                 PROCESSING STATUS
-            ================================================== -->
-
-            <div
-                id="loading-spinner"
-                class="hidden mt-6 p-4
-                       bg-[#0b001a]/70
-                       border border-cyan-500/30
-                       rounded-xl">
-
+            <div id="loading-spinner" class="hidden mt-6 p-4 bg-[#0b001a]/70 border border-cyan-500/30 rounded-xl">
                 <div class="flex items-center gap-3">
-
-                    <!-- Loading animation -->
-                    <div
-                        class="animate-spin
-                               rounded-full
-                               h-5 w-5
-                               border-b-2
-                               border-cyan-400">
-                    </div>
-
-                    <!-- Dynamic status message -->
-                    <span
-                        id="spinner-text"
-                        class="text-sm text-cyan-300 font-medium">
-
-                        Processing...
-
-                    </span>
-
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-cyan-400"></div>
+                    <span id="spinner-text" class="text-sm text-cyan-300 font-medium">Processing...</span>
                 </div>
-
             </div>
 
-
-            <!-- =================================================
-                 RESULT MESSAGE
-            ================================================== -->
-
-            <div
-                id="result-badge"
-                class="hidden mt-6 p-5 rounded-xl
-                       text-center">
-
-            </div>
+            <div id="result-badge" class="hidden mt-6 p-5 rounded-xl text-center"></div>
 
         </div>
-
     </section>
 
-
-    <!-- =====================================================
-         VERIFIER DASHBOARD
-    ====================================================== -->
-
-    <section
-        id="screen-verifier"
-        class="hidden">
-
-        <div
-            class="bg-[#120229]/80 backdrop-blur-xl
-                   border border-cyan-500/30
-                   rounded-2xl
-                   p-6
-                   shadow-2xl shadow-cyan-950/40">
-
-            <!-- Dashboard heading -->
-
+    <!-- VERIFIER DASHBOARD -->
+    <section id="screen-verifier" class="hidden">
+        <div class="bg-[#120229]/80 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-6 shadow-2xl shadow-cyan-950/40">
             <h2 class="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-pink-400">
-
                 Verifier Real-Time Monitor
-
             </h2>
-
             <p class="text-purple-200/70 text-sm mb-6">
-
                 Live ZeroTrace verification pipeline.
-
             </p>
-
-
-            <!-- =================================================
-                 PIPELINE STAGES
-            ================================================== -->
-
             <div class="space-y-3">
-
-                <!-- =================================================
-                     STAGE 1 — OCR
-                ================================================== -->
-
-                <div
-                    id="stage-ocr"
-                    class="stage p-4 rounded-lg
-                           bg-[#0b001a]/70
-                           border border-purple-500/20
-                           transition">
-
-                    🔍 OCR — Waiting
-
-                </div>
-
-
-                <!-- =================================================
-                     STAGE 2 — MOCK ISSUER
-                ================================================== -->
-
-                <div
-                    id="stage-issuer"
-                    class="stage p-4 rounded-lg
-                           bg-[#0b001a]/70
-                           border border-purple-500/20
-                           transition">
-
-                    🪪 Issuer — Waiting
-
-                </div>
-
-
-                <!-- =================================================
-                     STAGE 3 — ZKP GENERATION
-                ================================================== -->
-
-                <div
-                    id="stage-proof"
-                    class="stage p-4 rounded-lg
-                           bg-[#0b001a]/70
-                           border border-purple-500/20
-                           transition">
-
-                    🔐 Proof — Waiting
-
-                </div>
-
-
-                <!-- =================================================
-                     STAGE 4 — VERIFICATION
-                ================================================== -->
-
-                <div
-                    id="stage-verify"
-                    class="stage p-4 rounded-lg
-                           bg-[#0b001a]/70
-                           border border-purple-500/20
-                           transition">
-
-                    ✅ Verify — Waiting
-
-                </div>
-
+                <div id="stage-ocr" class="stage p-4 rounded-lg bg-[#0b001a]/70 border border-purple-500/20 transition">🔍 OCR — Waiting</div>
+                <div id="stage-issuer" class="stage p-4 rounded-lg bg-[#0b001a]/70 border border-purple-500/20 transition">🪪 Issuer — Waiting</div>
+                <div id="stage-proof" class="stage p-4 rounded-lg bg-[#0b001a]/70 border border-purple-500/20 transition">🔐 Proof — Waiting</div>
+                <div id="stage-verify" class="stage p-4 rounded-lg bg-[#0b001a]/70 border border-purple-500/20 transition">✅ Verify — Waiting</div>
             </div>
-
         </div>
-
     </section>
 
 </main>
-
-
-<!-- =========================================================
-     FRONTEND JAVASCRIPT
-========================================================= -->
 
 <script src="app.js"></script>
 
