@@ -178,7 +178,7 @@ To keep the live demo predictable, use these fixed test identities:
 | Name | Role |
 |------|------|
 | Sparsh | ZKP Circuits & Proof Generation |
-| Sachin | Database & Mock Scripts |
+| Sachin | Database  , QA Testing & Mock Scripts |
 | Snehalata | Frontend |
 | Ritik | Backend |
 | Tanu | Presentation & Design |
