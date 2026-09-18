@@ -5,65 +5,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ZeroTrace | Age Verification</title>
+    <title>ZeroTrace | Age Verification Portal</title>
 
-    <!-- =====================================================
-         Tailwind CSS
-         Used for styling the ZeroTrace UI.
-    ====================================================== -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- =====================================================
-         SnarkJS (UPDATED TO LOCAL FILE)
-         Used in the browser to generate and verify
-         the Groth16 Zero-Knowledge Proof.
-    ====================================================== -->
+    <!-- SnarkJS -->
     <script src="snarkjs.min.js"></script>
 
-    <!-- =====================================================
-         Tesseract.js
-         Performs OCR locally inside the user's browser.
-
-         IMPORTANT:
-         The uploaded image is NOT sent to the Flask server.
-    ====================================================== -->
+    <!-- Tesseract.js -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-    <!-- =====================================================
-         CircomlibJS (UPDATED TO LOCAL FILE)
-         Used for EdDSA / Poseidon cryptographic operations.
-    ====================================================== -->
+    <!-- CircomlibJS -->
     <script src="circomlibjs.min.js"></script>
 
     <script>
-    // Make CircomlibJS available globally for app.js
     if (typeof circomlibjs === "undefined") {
         console.error("CircomlibJS failed to load.");
     }
     </script>
 
     <style>
-        .animated-logo {
-            width: 55px;
-            height: 55px;
-            animation: pulseLogo 3s infinite ease-in-out;
+        .nav-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
         }
-        @keyframes pulseLogo {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+
+        .footer-emblem {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
         }
+
+        /* Exact color palette matching the clean reference image: Deep Navy background & pristine white cards */
+        body {
+            background-color: #0b132b;
+            color: #1e293b;
+        }
+
+        /* Electric Neon Funky Verify Button */
         #submit-btn {
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            border: 1px solid rgba(30, 58, 138, 0.4);
+            transition: transform 0.2s ease;
         }
+
+        #submit-btn:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+        }
+
+        #submit-btn:active {
+            transform: scale(0.98);
+        }
+
         #submit-btn.loading .btn-text {
             visibility: hidden;
         }
+
         #submit-btn.loading .spinner {
             display: block;
         }
+
         .spinner {
             display: none;
             position: absolute;
@@ -74,362 +84,214 @@
             border-top-color: #ffffff;
             animation: spin 0.8s linear infinite;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
     </style>
-
 </head>
 
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+<body class="min-h-screen font-sans flex flex-col justify-between selection:bg-blue-500/30">
 
-<!-- =========================================================
-     NAVIGATION BAR
-========================================================= -->
-
-<nav
-    class="border-b border-slate-800 bg-slate-950
-           px-6 py-4 flex justify-between items-center">
-
-    <!-- Project name -->
-    <div class="text-xl font-bold text-blue-400">
-        🛡️ ZeroTrace Engine
+<!-- TOP HEADER BAR -->
+<header class="w-full bg-[#0b132b] border-b border-slate-800 px-8 py-4 flex justify-between items-center shadow-md">
+    <div class="flex items-center space-x-3">
+        <img src="logo.jpeg" alt="Logo" class="nav-logo border border-slate-700">
+        <div>
+            <h1 class="text-base font-bold text-white tracking-wide">ZeroTrace Engine</h1>
+            <p class="text-xs text-slate-400 font-medium">Age Verification Portal</p>
+        </div>
     </div>
-
-    <!-- Navigation buttons -->
-    <div class="space-x-3">
-
-        <!-- User Portal -->
-        <button
-            onclick="switchTab('user')"
-            id="btn-user"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-500
-                   rounded-lg text-sm font-semibold transition">
-
+    <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+            🛡️ Secured by ZKP
+        </span>
+        <button onclick="switchTab('user')" id="btn-user" class="px-4 py-2 bg-slate-900 text-white hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold transition shadow-sm">
             User Portal
-
         </button>
-
-        <!-- Verifier Dashboard -->
-        <button
-            onclick="switchTab('verifier')"
-            id="btn-verifier"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700
-                   rounded-lg text-sm font-semibold transition">
-
-            Verifier Dashboard
-
+        <button onclick="switchTab('verifier')" id="btn-verifier" class="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition shadow-sm">
+            Verify Dashboard
         </button>
-
     </div>
+</header>
 
-</nav>
-
-
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
-
-<main class="max-w-2xl mx-auto mt-10 p-6">
-
-    <!-- =====================================================
-         USER PORTAL
-    ====================================================== -->
-
-    <section id="screen-user">
-
-        <div
-            class="bg-slate-800 border border-slate-700
-                   rounded-2xl p-6 shadow-xl">
-
-            <!-- Top Header with Logo -->
-            <div class="flex justify-between items-center mb-2">
+<!-- MAIN CONTENT CONTAINER -->
+<main class="max-w-6xl w-full mx-auto px-4 py-8 flex-grow space-y-8">
+    
+    <!-- USER PORTAL -->
+    <section id="screen-user" class="space-y-8">
+        <div class="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-slate-900">
+            
+            <!-- LEFT COLUMN: INTERACTIVE FORM CONTAINER (7 cols) -->
+            <div class="lg:col-span-7 space-y-6">
                 <div>
-                    <!-- Heading -->
-                    <h2 class="text-xl font-bold text-white">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">
                         Age Verification Portal
                     </h2>
+                    <p class="text-slate-500 text-sm mt-2 leading-relaxed">
+                        Verify your age securely using Zero Knowledge Proof technology. Your data is never shared or stored.
+                    </p>
                 </div>
-                <img src="logo.jpeg" alt="Logo" class="animated-logo">
-            </div>
 
-            <!-- Description -->
-            <p class="text-slate-400 text-sm mb-6">
-
-                Upload your government ID.
-                OCR runs locally in your browser and
-                your raw document is discarded after extraction.
-
-            </p>
-
-
-            <!-- =================================================
-                 DOCUMENT UPLOAD
-            ================================================== -->
-
-            <div
-                class="bg-slate-900 border border-slate-700
-                       rounded-xl p-4">
-
-                <label
-                    for="id-document"
-                    class="block text-sm font-medium mb-2">
-
-                    📄 Upload Government ID
-
-                </label>
-
-                <!--
-                    User selects the ID document.
-
-                    Only image files are accepted.
-                    The image stays inside the browser.
-                -->
-
-                <input
-                    type="file"
-                    id="id-document"
-                    accept="image/png,image/jpeg,image/jpg"
-                    class="w-full text-sm text-slate-400
-
-                           file:mr-4
-                           file:py-2
-                           file:px-4
-
-                           file:rounded-lg
-                           file:border-0
-
-                           file:bg-blue-600
-                           file:text-white
-
-                           hover:file:bg-blue-500
-
-                           cursor-pointer"
-                />
-
-                <!-- Privacy guarantee -->
-                <p class="text-xs text-slate-500 mt-2">
-
-                    🔒 Image is processed locally
-                    and discarded immediately after OCR.
-
-                </p>
-
-            </div>
-
-
-            <!-- =================================================
-                 START VERIFICATION BUTTON
-            ================================================== -->
-
-            <button
-                id="submit-btn"
-                type="button"
-                onclick="handleVerification(event)"
-                class="w-full mt-5 bg-blue-600
-                       hover:bg-blue-500
-                       text-white font-semibold
-                       py-3 rounded-lg
-                       transition">
-
-                <span class="btn-text">Generate & Verify ZKP</span>
-                <div class="spinner"></div>
-
-            </button>
-
-
-            <!-- =================================================
-                 PROCESSING STATUS
-            ================================================== -->
-
-            <div
-                id="loading-spinner"
-                class="hidden mt-6 p-4
-                       bg-slate-900
-                       border border-blue-500/30
-                       rounded-xl">
-
-                <div class="flex items-center gap-3">
-
-                    <!-- Loading animation -->
-                    <div
-                        class="animate-spin
-                               rounded-full
-                               h-5 w-5
-                               border-b-2
-                               border-blue-400">
+                <!-- SELECT VERIFICATION METHOD CARD -->
+                <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                        Select Verification Method
+                    </label>
+                    
+                    <!-- Local OCR File Upload Selector Box -->
+                    <div class="border border-slate-200 rounded-xl p-4 bg-white transition hover:border-blue-400 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">📄</span>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-800">Government ID OCR</h4>
+                                    <p class="text-xs text-slate-500">Local client-side extraction</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
+                                Recommended
+                            </span>
+                        </div>
+                        <input type="file" id="id-document" accept="image/png,image/jpeg,image/jpg" class="w-full text-xs text-slate-600 mt-2 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer font-medium"/>
                     </div>
 
-                    <!-- Dynamic status message -->
-                    <span
-                        id="spinner-text"
-                        class="text-sm text-blue-300">
+                    <button id="submit-btn" type="button" onclick="handleVerification(event)" class="w-full text-white font-bold tracking-wide py-3.5 rounded-xl transition shadow-md mt-2 bg-slate-900 hover:bg-slate-800">
+                        <span class="btn-text">Generate & Verify ZKP</span>
+                        <div class="spinner"></div>
+                    </button>
 
-                        Processing...
-
-                    </span>
-
+                    <div class="text-center">
+                        <span class="text-[11px] text-slate-400 font-medium">
+                            🔒 Secure. Private. Verifiable.
+                        </span>
+                    </div>
                 </div>
 
+                <div id="loading-spinner" class="hidden p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                        <span id="spinner-text" class="text-sm text-slate-700 font-medium">Processing local ZK proof pipeline...</span>
+                    </div>
+                </div>
+
+                <div id="result-badge" class="hidden p-5 rounded-xl text-center font-medium"></div>
+
+                <div class="flex items-center justify-center space-x-2 text-xs text-blue-600 font-medium pt-2">
+                    <span>🛡️</span>
+                    <span>Zero Knowledge Proofs ensure your identity remains private</span>
+                </div>
             </div>
 
+            <!-- RIGHT COLUMN: FEATURES & TRUST BADGES (5 cols) -->
+            <div class="lg:col-span-5 bg-slate-50/60 border border-slate-200/80 rounded-2xl p-6 space-y-6">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-700">
+                    Why ZeroTrace?
+                </h3>
 
-            <!-- =================================================
-                 RESULT MESSAGE
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="p-2 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 text-lg">
+                            🛡️
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900">Privacy by Design</h4>
+                            <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                                Your data stays with you. Only valid cryptographic proof is shared.
+                            </p>
+                        </div>
+                    </div>
 
-                 JavaScript will dynamically display:
+                    <div class="flex items-start space-x-3">
+                        <div class="p-2 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 text-lg">
+                            📜
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900">Government Compliant</h4>
+                            <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                                Built to meet India & EU data protection standards.
+                            </p>
+                        </div>
+                    </div>
 
-                 ✅ Credential issued
-                 ❌ ID not found
-                 ❌ ID revoked
-                 ❌ OCR/database mismatch
-                 ❌ Verification failed
-            ================================================== -->
-
-            <div
-                id="result-badge"
-                class="hidden mt-6 p-5 rounded-xl
-                       text-center">
-
+                    <div class="flex items-start space-x-3">
+                        <div class="p-2 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 text-lg">
+                            ⚡
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900">Tamper Proof</h4>
+                            <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                                Verifications are cryptographically secured and verifiable.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
-
     </section>
 
-
-    <!-- =====================================================
-         VERIFIER DASHBOARD
-
-         Judges can see the complete pipeline:
-
-         OCR
-          ↓
-         Issuer
-          ↓
-         Proof
-          ↓
-         Verify
-    ====================================================== -->
-
-    <section
-        id="screen-verifier"
-        class="hidden">
-
-        <div
-            class="bg-slate-800
-                   border border-slate-700
-                   rounded-2xl
-                   p-6
-                   shadow-xl">
-
-            <!-- Dashboard heading -->
-
-            <h2 class="text-xl font-bold mb-2 text-white">
-
-                Verifier Real-Time Monitor
-
-            </h2>
-
-            <p class="text-slate-400 text-sm mb-6">
-
-                Live ZeroTrace verification pipeline.
-
-            </p>
-
-
-            <!-- =================================================
-                 PIPELINE STAGES
-            ================================================== -->
-
+    <!-- VERIFIER DASHBOARD -->
+    <section id="screen-verifier" class="hidden">
+        <div class="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-xl text-slate-900 space-y-6">
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-1">
+                    Verifier Real-Time Monitor
+                </h2>
+                <p class="text-slate-500 text-sm">
+                    Live ZeroTrace verification pipeline monitoring backend checks and ZK proof validations.
+                </p>
+            </div>
             <div class="space-y-3">
-
-                <!-- =================================================
-                     STAGE 1 — OCR
-                ================================================== -->
-
-                <div
-                    id="stage-ocr"
-                    class="stage p-4 rounded-lg
-                           bg-slate-900
-                           border border-slate-700
-                           transition">
-
-                    🔍 OCR — Waiting
-
-                </div>
-
-
-                <!-- =================================================
-                     STAGE 2 — MOCK ISSUER
-                ================================================== -->
-
-                <div
-                    id="stage-issuer"
-                    class="stage p-4 rounded-lg
-                           bg-slate-900
-                           border border-slate-700
-                           transition">
-
-                    🪪 Issuer — Waiting
-
-                </div>
-
-
-                <!-- =================================================
-                     STAGE 3 — ZKP GENERATION
-                ================================================== -->
-
-                <div
-                    id="stage-proof"
-                    class="stage p-4 rounded-lg
-                           bg-slate-900
-                           border border-slate-700
-                           transition">
-
-                    🔐 Proof — Waiting
-
-                </div>
-
-
-                <!-- =================================================
-                     STAGE 4 — VERIFICATION
-                ================================================== -->
-
-                <div
-                    id="stage-verify"
-                    class="stage p-4 rounded-lg
-                           bg-slate-900
-                           border border-slate-700
-                           transition">
-
-                    ✅ Verify — Waiting
-
-                </div>
-
+                <div id="stage-ocr" class="stage p-4 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700 transition">🔍 OCR — Waiting</div>
+                <div id="stage-issuer" class="stage p-4 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700 transition">🪪 Issuer — Waiting</div>
+                <div id="stage-proof" class="stage p-4 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700 transition">🔐 Proof — Waiting</div>
+                <div id="stage-verify" class="stage p-4 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700 transition">✅ Verify — Waiting</div>
             </div>
+        </div>
+    </section>
 
+    <!-- BOTTOM FLOATING FOOTER METRICS BAR -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-lg grid grid-cols-1 md:grid-cols-3 gap-4 items-center text-slate-800">
+        
+        <!-- Left: Emblem & Gov Info -->
+        <div class="flex items-center space-x-3 md:border-r border-slate-200 pr-4">
+            <img src="emblem.jpg" alt="Emblem" class="footer-emblem">
+            <div>
+                <h4 class="text-xs font-bold text-slate-900">Digital India Initiative</h4>
+                <p class="text-[10px] text-slate-500 font-medium">Secured Architecture</p>
+            </div>
         </div>
 
-    </section>
+        <!-- Middle: Data Protection -->
+        <div class="flex items-center space-x-3 md:border-r border-slate-200 px-2">
+            <div class="p-2 rounded-lg bg-slate-100 text-slate-700 text-sm">🛡️</div>
+            <div>
+                <h4 class="text-xs font-bold text-slate-900">Data Protection</h4>
+                <p class="text-[10px] text-slate-500 font-medium">By Design & Default</p>
+            </div>
+        </div>
+
+        <!-- Right: Security -->
+        <div class="flex items-center space-x-3 pl-2">
+            <div class="p-2 rounded-lg bg-slate-100 text-slate-700 text-sm">🔒</div>
+            <div>
+                <h4 class="text-xs font-bold text-slate-900">100% Secure</h4>
+                <p class="text-[10px] text-slate-500 font-medium">End-to-End Encryption</p>
+            </div>
+        </div>
+
+    </div>
 
 </main>
 
-
-<!-- =========================================================
-     FRONTEND JAVASCRIPT
-
-     app.js contains:
-
-     1. OCR
-     2. OCR → ID extraction
-     3. Credential request
-     4. Credential validation
-     5. ZKP generation
-     6. Proof submission
-     7. Dashboard updates
-========================================================= -->
+<!-- BOTTOM FOOTER METRICS BAR -->
+<footer class="w-full bg-[#0b132b] border-t border-slate-800 py-4 px-8 mt-6">
+    <div class="max-w-6xl mx-auto flex justify-center items-center text-xs text-slate-400">
+        <p>© 2026 ZeroTrace Engine. All rights reserved.</p>
+    </div>
+</footer>
 
 <script src="app.js"></script>
 

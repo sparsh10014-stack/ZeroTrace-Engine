@@ -156,6 +156,7 @@ def verify_proof():
             os.remove(public_path)
 
 if __name__ == '__main__':
-    print("Starting ZeroTrace Verifier Node on http://127.0.0.1:5000 ...")
-    app.run(debug=True, port=5000)
-    #signing off tanu 
+    print("Starting ZeroTrace Verifier Node on http://127.0.0.1:5000 ...") 
+    app.run(debug=True, port=5000)  
+    # hello
+    #signingoff Sachin
